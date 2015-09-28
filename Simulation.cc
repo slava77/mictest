@@ -341,9 +341,10 @@ void setupTrackFromTextFile(SVector3& pos, SVector3& mom, SMatrixSym66& covtrk, 
   hits.reserve(nTotHit);
   initHits.reserve(nTotHit);
 
+  bool doSmearing = true;
   // std::ifstream infile("cmssw.simtracks.SingleMu10GeV.10k.eta06z5.txt");
   std::ifstream infile("cmssw.simtracks.SingleMu1GeV.1k.eta06z5.txt");
-  // std::ifstream infile("cmssw.simtracks.SingleMu1GeVNoMaterial.1k.eta06z5.txt");
+  // std::ifstream infile("cmssw.simtracks.SingleMu1GeVNoMaterial.1k.eta06z5.txt");doSmearing = false;
   // std::ifstream infile("cmssw.simtracks.SingleMu06GeV.1k.eta06z5.txt");
   std::string line;
   int countTracks = -1;
@@ -405,9 +406,11 @@ void setupTrackFromTextFile(SVector3& pos, SVector3& mom, SMatrixSym66& covtrk, 
       float hitZ    = initZ;
       float hitPhi  = initPhi;
       float hitRad  = initRad;
-      hitZ    += hitposerrZ*g_gaus(g_gen);
-      hitPhi  += ((hitposerrXY/initRad)*g_gaus(g_gen));
-      hitRad  += (hitposerrR)*g_gaus(g_gen);
+      if (doSmearing) {
+	hitZ    += hitposerrZ*g_gaus(g_gen);
+	hitPhi  += ((hitposerrXY/initRad)*g_gaus(g_gen));
+	hitRad  += (hitposerrR)*g_gaus(g_gen);
+      }
 
       float hitRad2 = hitRad*hitRad;
       float hitX    = hitRad*cos(hitPhi);
