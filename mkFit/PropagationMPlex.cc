@@ -213,14 +213,13 @@ void helixAtRFromIterative(const MPlexLV& inPar, const MPlexQI& inChg, MPlexLV& 
       const float& pxin = inPar.ConstAt(n, 3, 0);
       const float& pyin = inPar.ConstAt(n, 4, 0);
       const float& pzin = inPar.ConstAt(n, 5, 0);
-      
-      float r    = msRad.ConstAt(n, 0, 0);
-      float r0in = hipo(xin, yin);
+      const float& r    = msRad.ConstAt(n, 0, 0);
+      float r0 = hipo(xin, yin);
       
 #ifdef DEBUG
-      if (dump) std::cout << "attempt propagation from r=" << r0in << " to r=" << r << std::endl;
+      if (dump) std::cout << "attempt propagation from r=" << r0 << " to r=" << r << std::endl;
       if (dump) std::cout << "x=" << xin << " y=" << yin  << " z=" << inPar.ConstAt(n, 2, 0) << " px=" << pxin << " py=" << pyin << " pz=" << pzin << " q=" << inChg.ConstAt(n, 0, 0) << std::endl;
-      // if ((r0in-r)>=0) {
+      // if ((r0-r)>=0) {
       //    if (dump) std::cout << "target radius same or smaller than starting point, returning input" << std::endl;
       //    return;
       // }
@@ -240,14 +239,12 @@ void helixAtRFromIterative(const MPlexLV& inPar, const MPlexQI& inChg, MPlexLV& 
 #endif
       
       //variables to be updated at each iterations
-      //derivatives initialized to value for first iteration, i.e. distance = r-r0in
       float totalDistance = 0;
       //temporaries used within the loop (declare here to reduce memory operations)
       float x = 0.;
       float y = 0.;
       float px = 0.;
       float py = 0.;
-      float r0 = 0.;
       float cosAP=0.;
       float sinAP=0.;
       // float dxdvar = 0.;
@@ -353,9 +350,8 @@ void helixAtRFromIntersection(const MPlexLV& inPar, const MPlexQI& inChg, MPlexL
       const float& pxin = inPar.ConstAt(n, 3, 0);
       const float& pyin = inPar.ConstAt(n, 4, 0);
       const float& pzin = inPar.ConstAt(n, 5, 0);
-      
-      float rout = msRad.ConstAt(n, 0, 0);
-      float r0in = hipo(xin, yin);
+      const float& rout = msRad.ConstAt(n, 0, 0);
+      const float r0in = hipo(xin, yin);
       
 #ifdef DEBUG
       if (dump) std::cout << "attempt propagation from r=" << r0in << " to r=" << r << std::endl;
@@ -457,7 +453,7 @@ void applyMaterialEffects(const MPlexQF &hitsRl, const MPlexQF& hitsXi, MPlexLS 
   for (int n = 0; n < NN; ++n)
     {
       float radL = hitsRl.ConstAt(n,0,0);
-      if (radL<0.0000000000001) continue;
+      if (radL<0.0000000000001) continue;//ugly, please fixme
       const float& x = outPar.ConstAt(n,0,0);
       const float& y = outPar.ConstAt(n,0,1);
       const float& px = outPar.ConstAt(n,0,3);
@@ -581,7 +577,7 @@ void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
 #endif
 
    //add multiple scattering uncertainty and energy loss
-   applyMaterialEffects(hitsRl, hitsXi, outErr, outPar);   
+   applyMaterialEffects(hitsRl, hitsXi, outErr, outPar);
 
    /*
      if (fabs(sqrt(outPar[0]*outPar[0]+outPar[1]*outPar[1])-r)>0.0001) {
