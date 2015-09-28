@@ -269,13 +269,13 @@ void MkFitter::TestPropagation()
     float pxin = Par[iC].At(0, 3, 0);
     float pyin = Par[iC].At(0, 4, 0);
     float pzin = Par[iC].At(0, 5, 0);
-    float r = sqrt(xin*xin + yin*yin);
+    float rin = sqrt(xin*xin + yin*yin);
     float pt = sqrt(pxin*pxin + pyin*pyin);
     int charge = Chg.At(0, 0, 0);
     float mf = 3.8112;
     float k=charge*100./(-0.299792458*mf);
     float curvature = pt*k;//in cm
-    float R =  hipo(msPar[hi].At(0, 0, 0), msPar[hi].At(0, 1, 0));
+    float rout =  hipo(msPar[hi].At(0, 0, 0), msPar[hi].At(0, 1, 0));
 
     std::cout <<
       " xin=" << xin <<
@@ -284,14 +284,21 @@ void MkFitter::TestPropagation()
       " pxin=" << pxin <<
       " pyin=" << pyin <<
       " pzin=" << pzin <<
-      " r=" << r <<
+      " rin=" << rin <<
       " pt=" << pt <<
       " q=" << charge <<
       " k=" << k << 
       " curvature=" << curvature <<
       " rho=" << 1./curvature <<
-      " R=" << R <<
+      " rout=" << rout <<
       std::endl;
+
+    // Err[iC].At(0, 0, 0) = 0.;//10-5
+    // Err[iC].At(0, 1, 1) = 0.;//10-8
+    // Err[iC].At(0, 2, 2) = 0.;//check
+    // Err[iC].At(0, 3, 3) = 0.;//check
+    // Err[iC].At(0, 4, 4) = 0.;//check
+    // Err[iC].At(0, 5, 5) = 0.;
 
     std::cout << "err = " << Err[iC].At(0, 0, 0) << " " << Err[iC].At(0, 0, 1) << " " << Err[iC].At(0, 0, 2) << " " << Err[iC].At(0, 0, 3) << " " << Err[iC].At(0, 0, 4) << " " << Err[iC].At(0, 0, 5) << std::endl
 	      << "      " << Err[iC].At(0, 1, 0) << " " << Err[iC].At(0, 1, 1) << " " << Err[iC].At(0, 1, 2) << " " << Err[iC].At(0, 1, 3) << " " << Err[iC].At(0, 1, 4) << " " << Err[iC].At(0, 1, 5) << std::endl
@@ -317,7 +324,7 @@ void MkFitter::TestPropagation()
 	      << std::setw(10) << "      " << std::setw(10) << Err[iP].At(0, 2, 0) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 2, 1) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 2, 2) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 2, 3) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 2, 4) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 2, 5) << std::setw(10) << std::endl
 	      << std::setw(10) << "      " << std::setw(10) << Err[iP].At(0, 3, 0) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 3, 1) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 3, 2) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 3, 3) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 3, 4) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 3, 5) << std::setw(10) << std::endl
 	      << std::setw(10) << "      " << std::setw(10) << Err[iP].At(0, 4, 0) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 4, 1) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 4, 2) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 4, 3) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 4, 4) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 4, 5) << std::setw(10) << std::endl
-	      << std::setw(10) << "      " << std::setw(10) << Err[iP].At(0, 5, 0) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 5, 1) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 5, 2) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 5, 3) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 5, 4) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 5, 5) << std::setw(10) << std::endl;
+	      << std::setw(10) << "      " << std::setw(10) << Err[iP].At(0, 5, 0) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 5, 1) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 5, 2) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 5, 3) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 5, 4) << std::setw(10) << " " << std::setw(10) << Err[iP].At(0, 5, 5) << std::endl;
 
     float xc = xin - curvature*pyin/pt;
     float yc = yin + curvature*pxin/pt;
@@ -325,21 +332,93 @@ void MkFitter::TestPropagation()
 
     // std::cout << "xc=" << xc << " yc=" << yc << " rc=" << rc << std::endl;
 
-    float A = 1 + xc*xc/(yc*yc);
-    float B = -(R*R + rc*rc - curvature*curvature)*xc/(yc*yc);
-    float C = (R*R + rc*rc - curvature*curvature)*(R*R + rc*rc - curvature*curvature)/(4*yc*yc) - R*R;
+    //solve for x
 
-    // std::cout << "A=" << A << " B=" << B << " C=" << C << std::endl;
+    float Ax = 1 + xc*xc/(yc*yc);
+    float Bx = -(rout*rout + rc*rc - curvature*curvature)*xc/(yc*yc);
+    float Cx = (rout*rout + rc*rc - curvature*curvature)*(rout*rout + rc*rc - curvature*curvature)/(4*yc*yc) - rout*rout;
 
-    float xp = ( -B + sqrt(B*B - 4*A*C) ) / (2*A);
-    float xm = ( -B - sqrt(B*B - 4*A*C) ) / (2*A);
+    // std::cout << "Ax=" << Ax << " Bx=" << Bx << " Cx=" << Cx << std::endl;
+    // std::cout << "Bx*Bx - 4*Ax*Cx = " << Bx*Bx - 4*Ax*Cx << std::endl;
 
-    // std::cout << "B*B - 4*A*C = " << B*B - 4*A*C << std::endl;
+    float x_xp = ( -Bx + sqrt(Bx*Bx - 4*Ax*Cx) ) / (2*Ax);
+    float y_xp = -x_xp*xc/yc + (rout*rout + rc*rc - curvature*curvature)/(2*yc);
+    float cosDelta_xp = (pxin*x_xp + pxin*x_xp)/(pt*rout);
 
-    float yp = -xp*xc/yc + (R*R + rc*rc - curvature*curvature)/(2*yc);
-    float ym = -xm*xc/yc + (R*R + rc*rc - curvature*curvature)/(2*yc);
+    float chord_xp = sqrt( (x_xp-xin)*(x_xp-xin) + (y_xp-yin)*(y_xp-yin) );
+    float sinTPHalf_xp = 0.5*chord_xp/curvature;
+    float TP_xp = 2*asin(sinTPHalf_xp);
+    float sinTP_xp = sin(TP_xp);
+    float cosTP_xp = cos(TP_xp);
 
-    std::cout << "xp=" << xp << " yp=" << yp << " --- xm=" << xm << " ym=" << ym << std::endl;
+    float z_xp = zin + k*TP_xp*pzin;
+    float px_xp = pxin*cosTP_xp-pyin*sinTP_xp;
+    float py_xp = pyin*cosTP_xp+pxin*sinTP_xp;
+    float pz_xp = pzin;
+
+    std::cout << "x_xp=" << x_xp << " y_xp=" << y_xp << " z_xp=" << z_xp << " px_xp=" << px_xp << " py_xp=" << py_xp << " pz_xp=" << pz_xp << " cosDelta_xp=" << cosDelta_xp << std::endl;
+
+    float x_xm = ( -Bx - sqrt(Bx*Bx - 4*Ax*Cx) ) / (2*Ax);
+    float y_xm = -x_xm*xc/yc + (rout*rout + rc*rc - curvature*curvature)/(2*yc);
+    float cosDelta_xm = (pxin*x_xm + pxin*x_xm)/(pt*rout);
+
+    float chord_xm = sqrt( (x_xm-xin)*(x_xm-xin) + (y_xm-yin)*(y_xm-yin) );
+    float sinTPHalf_xm = 0.5*chord_xm/curvature;
+    float TP_xm = 2*asin(sinTPHalf_xm);
+    float sinTP_xm = sin(TP_xm);
+    float cosTP_xm = cos(TP_xm);
+
+    float z_xm = zin + k*TP_xm*pzin;
+    float px_xm = pxin*cosTP_xm-pyin*sinTP_xm;
+    float py_xm = pyin*cosTP_xm+pxin*sinTP_xm;
+    float pz_xm = pzin;
+
+    std::cout << "x_xm=" << x_xm << " y_xm=" << y_xm << " z_xm=" << z_xm << " px_xm=" << px_xm << " py_xm=" << py_xm << " pz_xm=" << pz_xm << " cosDelta_xm=" << cosDelta_xm << std::endl;
+
+
+    //solve for y (in case yc==0)
+
+    float Ay = 1 + yc*yc/(xc*xc);
+    float By = -(rout*rout + rc*rc - curvature*curvature)*yc/(xc*xc);
+    float Cy = (rout*rout + rc*rc - curvature*curvature)*(rout*rout + rc*rc - curvature*curvature)/(4*xc*xc) - rout*rout;
+
+    // std::cout << "Ay=" << Ay << " By=" << By << " Cy=" << Cy << std::endl;
+    // std::cout << "By*By - 4*Ay*Cy = " << By*By - 4*Ay*Cy << std::endl;
+
+    float y_yp = ( -By + sqrt(By*By - 4*Ay*Cy) ) / (2*Ay);
+    float x_yp = -y_yp*yc/xc + (rout*rout + rc*rc - curvature*curvature)/(2*xc);
+    float cosDelta_yp = (pxin*x_yp + pxin*x_yp)/(pt*rout);
+
+    float chord_yp = sqrt( (x_yp-xin)*(x_yp-xin) + (y_yp-yin)*(y_yp-yin) );
+    float sinTPHalf_yp = 0.5*chord_yp/curvature;
+    float TP_yp = 2*asin(sinTPHalf_yp);
+    float sinTP_yp = sin(TP_yp);
+    float cosTP_yp = cos(TP_yp);
+
+    float z_yp = zin + k*TP_yp*pzin;
+    float px_yp = pxin*cosTP_yp-pyin*sinTP_yp;
+    float py_yp = pyin*cosTP_yp+pxin*sinTP_yp;
+    float pz_yp = pzin;
+
+    std::cout << "x_yp=" << x_yp << " y_yp=" << y_yp << " z_yp=" << z_yp << " px_yp=" << px_yp << " py_yp=" << py_yp << " pz_yp=" << pz_yp << " cosDelta_yp=" << cosDelta_yp << std::endl;
+
+    float y_ym = ( -By - sqrt(By*By - 4*Ay*Cy) ) / (2*Ay);
+    float x_ym = -y_ym*yc/xc + (rout*rout + rc*rc - curvature*curvature)/(2*xc);
+    float cosDelta_ym = (pxin*x_ym + pxin*x_ym)/(pt*rout);
+
+    float chord_ym = sqrt( (x_ym-xin)*(x_ym-xin) + (y_ym-yin)*(y_ym-yin) );
+    float sinTPHalf_ym = 0.5*chord_ym/curvature;
+    float TP_ym = 2*asin(sinTPHalf_ym);
+    float sinTP_ym = sin(TP_ym);
+    float cosTP_ym = cos(TP_ym);
+
+    float z_ym = zin + k*TP_ym*pzin;
+    float px_ym = pxin*cosTP_ym-pyin*sinTP_ym;
+    float py_ym = pyin*cosTP_ym+pxin*sinTP_ym;
+    float pz_ym = pzin;
+
+    std::cout << "x_ym=" << x_ym << " y_ym=" << y_ym << " z_ym=" << z_ym << " px_ym=" << px_ym << " py_ym=" << py_ym << " pz_ym=" << pz_ym << " cosDelta_ym=" << cosDelta_ym  << std::endl;
+
 
   }
 
