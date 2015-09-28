@@ -146,7 +146,7 @@ void MultHelixPropTransp(const MPlexLL& A, const MPlexLL& B, MPlexLS& C)
 // 3. matriplexofy temporaries ???
 // 4. all access to matriplexes by index, somehow ... sigh
 
-void computeJacobian(int n, MPlexLL& errorProp, float s, float k, float p, float pxin, float pyin, float pzin, float TP, float cosTP, float sinTP) {
+inline void computeJacobian(int n, MPlexLL& errorProp, float s, float k, float p, float pxin, float pyin, float pzin, float TP, float cosTP, float sinTP) {
 
   // std::cout << "total path s=" << s << std::endl;
   // TD = s*pt/p;
