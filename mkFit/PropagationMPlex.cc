@@ -146,35 +146,77 @@ void MultHelixPropTransp(const MPlexLL& A, const MPlexLL& B, MPlexLS& C)
 // 3. matriplexofy temporaries ???
 // 4. all access to matriplexes by index, somehow ... sigh
 
-// void propagateHelixToRMPlex(TrackState& inputState, float r, TrackState& result)
-void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
-                            const MPlexQI &inChg,  const MPlexHV& msPar, 
-			    const MPlexQF &hitsRl, const MPlexQF& hitsXi,
-                                  MPlexLS &outErr,       MPlexLV& outPar)
-{
-#ifdef DEBUG
-  const bool dump = false;
-#endif
+void computeJacobian(int n, MPlexLL& errorProp, float s, float k, float p, float pxin, float pyin, float pzin, float TP, float cosTP, float sinTP) {
 
-   const idx_t N  = NN;
+  // std::cout << "total path s=" << s << std::endl;
+  // TD = s*pt/p;
+  // TP = TD/(pt*k) = s/(p*k);
+  float dTPdpx = -s*pxin/(k*p*p*p);
+  float dTPdpy = -s*pyin/(k*p*p*p);
+  float dTPdpz = -s*pzin/(k*p*p*p);
+  
+  //derive these to compute jacobian
+  //x = xin + k*(pxin*sinTP-pyin*(1-cosTP));
+  //y = yin + k*(pyin*sinTP+pxin*(1-cosTP));
+  //z = zin + k*TP*pzin;
+  //px = pxin*cosTP-pyin*sinTP;
+  //py = pyin*cosTP+pxin*sinTP;
+  //pz = pzin;
+  //jacobian
+  
+  errorProp(n,0,0) = 1.;	                                             //dxdx
+  errorProp(n,0,1) = 0.;	                                             //dxdy
+  errorProp(n,0,2) = 0.;                                                     //dxdz
+  errorProp(n,0,3) = k*(sinTP + pxin*cosTP*dTPdpx - pyin*sinTP*dTPdpx);      //dxdpx
+  errorProp(n,0,4) = k*(pxin*cosTP*dTPdpy - 1. + cosTP - pyin*sinTP*dTPdpy); //dxdpy
+  errorProp(n,0,5) = k*dTPdpz*(pxin*cosTP - pyin*sinTP);                     //dxdpz
+  errorProp(n,1,0) = 0.;	                                             //dydx
+  errorProp(n,1,1) = 1.;	                                             //dydy
+  errorProp(n,1,2) = 0.;                                                     //dydz
+  errorProp(n,1,3) = k*(pyin*cosTP*dTPdpx + 1. - cosTP + pxin*sinTP*dTPdpx); //dydpx
+  errorProp(n,1,4) = k*(sinTP + pyin*cosTP*dTPdpy + pxin*sinTP*dTPdpy);      //dydpy
+  errorProp(n,1,5) = k*dTPdpz*(pyin*cosTP + pxin*sinTP);                     //dydpz
+  errorProp(n,2,0) = 0.;	                                             //dzdx
+  errorProp(n,2,1) = 0.;	                                             //dzdy
+  errorProp(n,2,2) = 1.;                                                     //dzdz
+  errorProp(n,2,3) = k*pzin*dTPdpx;                                          //dzdpx
+  errorProp(n,2,4) = k*pzin*dTPdpy;                                          //dzdpy
+  errorProp(n,2,5) = k*(TP + dTPdpz*pzin);                                   //dzdpz
+  errorProp(n,3,0) = 0.;	                                             //dpxdx
+  errorProp(n,3,1) = 0.;	                                             //dpxdy
+  errorProp(n,3,2) = 0.;                                                     //dpxdz
+  errorProp(n,3,3) = cosTP - dTPdpx*(pxin*sinTP + pyin*cosTP);               //dpxdpx
+  errorProp(n,3,4) = -sinTP - dTPdpy*(pxin*sinTP + pyin*cosTP);              //dpxdpy
+  errorProp(n,3,5) = -dTPdpz*(pxin*sinTP + pyin*cosTP);                      //dpxdpz
+  errorProp(n,4,0) = 0.;                                                     //dpydx
+  errorProp(n,4,1) = 0.;	                                             //dpydyd
+  errorProp(n,4,2) = 0.;                                                     //dpydz
+  errorProp(n,4,3) = +sinTP - dTPdpx*(pyin*sinTP - pxin*cosTP);              //dpydpx
+  errorProp(n,4,4) = +cosTP - dTPdpy*(pyin*sinTP - pxin*cosTP);              //dpydpy
+  errorProp(n,4,5) = -dTPdpz*(pyin*sinTP - pxin*cosTP);                      //dpydpz
+  errorProp(n,5,0) = 0.;                                                     //dpzdx
+  errorProp(n,5,1) = 0.;						     //dpzdy
+  errorProp(n,5,2) = 0.;						     //dpzdz 
+  errorProp(n,5,3) = 0.;						     //dpzdpx
+  errorProp(n,5,4) = 0.;						     //dpzdpy
+  errorProp(n,5,5) = 1.;						     //dpzdpz  
+  
+}
 
-   outErr = inErr;
-   outPar = inPar;
-
-   MPlexLL errorProp;
+void helixAtRFromIterative(const MPlexLV& inPar, const MPlexQI& inChg, MPlexLV& outPar, MPlexQF &msRad, MPlexLL& errorProp) {
 
 #pragma simd
-   for (int n = 0; n < N; ++n)
-   {
+  for (int n = 0; n < NN; ++n)
+    {
       const float& xin  = inPar.ConstAt(n, 0, 0);
       const float& yin  = inPar.ConstAt(n, 1, 0);
       const float& pxin = inPar.ConstAt(n, 3, 0);
       const float& pyin = inPar.ConstAt(n, 4, 0);
       const float& pzin = inPar.ConstAt(n, 5, 0);
-
-      float r    = hipo(msPar.ConstAt(n, 0, 0), msPar.ConstAt(n, 1, 0));
+      
+      float r    = msRad.ConstAt(n, 0, 0);
       float r0in = hipo(xin, yin);
-
+      
 #ifdef DEBUG
       if (dump) std::cout << "attempt propagation from r=" << r0in << " to r=" << r << std::endl;
       if (dump) std::cout << "x=" << xin << " y=" << yin  << " z=" << inPar.ConstAt(n, 2, 0) << " px=" << pxin << " py=" << pyin << " pz=" << pzin << " q=" << inChg.ConstAt(n, 0, 0) << std::endl;
@@ -183,7 +225,7 @@ void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
       //    return;
       // }
 #endif
-
+      
       float pt2    = pxin*pxin+pyin*pyin;
       float pt     = sqrt(pt2);
       float ptinv  = 1./pt;
@@ -191,12 +233,12 @@ void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
       //p=0.3Br => r=p/(0.3*B)
       float k = inChg.ConstAt(n, 0, 0) * 100. / (-0.299792458*3.8112);
       float invcurvature = 1./(pt*k);//in 1./cm
-
+      float ctgTheta=pzin*ptinv;
+      
 #ifdef DEBUG
       if (dump) std::cout << "curvature=" << 1./invcurvature << std::endl;
 #endif
-
-      float ctgTheta=pzin*ptinv;
+      
       //variables to be updated at each iterations
       //derivatives initialized to value for first iteration, i.e. distance = r-r0in
       float totalDistance = 0;
@@ -206,7 +248,6 @@ void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
       float px = 0.;
       float py = 0.;
       float r0 = 0.;
-      float angPath = 0.;//maybe this temporary can be removed?
       float cosAP=0.;
       float sinAP=0.;
       // float dxdvar = 0.;
@@ -215,195 +256,206 @@ void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
       //const unsigned int Niter = 10;
       // const unsigned int Niter = 5+std::round(r-r0)/2;
       for (unsigned int i=0;i<Config::Niter;++i)
-      {
+	{
 #ifdef DEBUG
-         if (dump) std::cout << "propagation iteration #" << i << std::endl;
+	  if (dump) std::cout << "propagation iteration #" << i << std::endl;
 #endif
-
-         x  = outPar.At(n, 0, 0);
-         y  = outPar.At(n, 1, 0);
-         px = outPar.At(n, 3, 0);
-         py = outPar.At(n, 4, 0);
-         r0 = hipo(outPar.At(n, 0, 0), outPar.At(n, 1, 0));
-
+	  
+	  x  = outPar.At(n, 0, 0);
+	  y  = outPar.At(n, 1, 0);
+	  px = outPar.At(n, 3, 0);
+	  py = outPar.At(n, 4, 0);
+	  r0 = hipo(outPar.At(n, 0, 0), outPar.At(n, 1, 0));
+	  
 #ifdef DEBUG
-         if (dump) std::cout << "r0=" << r0 << " pt=" << pt << std::endl;
-         // if (dump) {
-         //    if (r==r0) {
-         //       std::cout << "distance = 0 at iteration=" << i << std::endl;
-         //       break;
-         //    }
-         // }
+	  if (dump) std::cout << "r0=" << r0 << " pt=" << pt << std::endl;
+	  // if (dump) {
+	  //    if (r==r0) {
+	  //       std::cout << "distance = 0 at iteration=" << i << std::endl;
+	  //       break;
+	  //    }
+	  // }
 #endif
-
-         //distance=r-r0;//remove temporary
-         totalDistance+=(r-r0);
+	  
+	  //distance=r-r0;//remove temporary
+	  totalDistance+=(r-r0);
+	  
 #ifdef DEBUG
-         if (dump) std::cout << "distance=" << (r-r0) << std::endl;
+	  if (dump) std::cout << "distance=" << (r-r0) << " angPath=" << (r-r0)*invcurvature << std::endl;
 #endif
-         angPath = (r-r0)*invcurvature;
+	  
+	  //float angPath = (r-r0)*invcurvature;
+	  cosAP=cos((r-r0)*invcurvature);
+	  sinAP=sin((r-r0)*invcurvature);
+	  // sincos4(angPath, sinAP, cosAP);
+	  
+	  //helix propagation formulas
+	  //http://www.phys.ufl.edu/~avery/fitting/fitting4.pdf
+	  outPar.At(n, 0, 0) = outPar.At(n, 0, 0) + k*(px*sinAP-py*(1-cosAP));
+	  outPar.At(n, 1, 0) = outPar.At(n, 1, 0) + k*(py*sinAP+px*(1-cosAP));
+	  outPar.At(n, 2, 0) = outPar.At(n, 2, 0) + (r-r0)*ctgTheta;
+	  outPar.At(n, 3, 0) = px*cosAP-py*sinAP;
+	  outPar.At(n, 4, 0) = py*cosAP+px*sinAP;
+	  //outPar.At(n, 5, 0) = pz; //take this out as it is redundant
+	  
 #ifdef DEBUG
-         if (dump) std::cout << "angPath=" << angPath << std::endl;
+	  if (dump) std::cout << "iteration end, dump parameters" << std::endl;
+	  if (dump) std::cout << "pos = " << outPar.At(n, 0, 0) << " " << outPar.At(n, 1, 0) << " " << outPar.At(n, 2, 0) << std::endl;
+	  if (dump) std::cout << "mom = " << outPar.At(n, 3, 0) << " " << outPar.At(n, 4, 0) << " " << outPar.At(n, 5, 0) << std::endl;
+	  if (dump) std::cout << "r=" << sqrt( outPar.At(n, 0, 0)*outPar.At(n, 0, 0) + outPar.At(n, 1, 0)*outPar.At(n, 1, 0) ) << " pT=" << sqrt( outPar.At(n, 3, 0)*outPar.At(n, 3, 0) + outPar.At(n, 4, 0)*outPar.At(n, 4, 0) ) << std::endl;
 #endif
-
-         cosAP=cos(angPath);
-         sinAP=sin(angPath);
-         // sincos4(angPath, sinAP, cosAP);
-
-         //helix propagation formulas
-         //http://www.phys.ufl.edu/~avery/fitting/fitting4.pdf
-         outPar.At(n, 0, 0) = outPar.At(n, 0, 0) + k*(px*sinAP-py*(1-cosAP));
-         outPar.At(n, 1, 0) = outPar.At(n, 1, 0) + k*(py*sinAP+px*(1-cosAP));
-         outPar.At(n, 2, 0) = outPar.At(n, 2, 0) + (r-r0)*ctgTheta;
-         outPar.At(n, 3, 0) = px*cosAP-py*sinAP;
-         outPar.At(n, 4, 0) = py*cosAP+px*sinAP;
-         //outPar.At(n, 5, 0) = pz; //take this out as it is redundant
-
-#ifdef DEBUG
-	 if (dump) std::cout << "iteration end, dump parameters" << std::endl;
-         if (dump) std::cout << "pos = " << outPar.At(n, 0, 0) << " " << outPar.At(n, 1, 0) << " " << outPar.At(n, 2, 0) << std::endl;
-         if (dump) std::cout << "mom = " << outPar.At(n, 3, 0) << " " << outPar.At(n, 4, 0) << " " << outPar.At(n, 5, 0) << std::endl;
-	 if (dump) std::cout << "r=" << sqrt( outPar.At(n, 0, 0)*outPar.At(n, 0, 0) + outPar.At(n, 1, 0)*outPar.At(n, 1, 0) ) << " pT=" << sqrt( outPar.At(n, 3, 0)*outPar.At(n, 3, 0) + outPar.At(n, 4, 0)*outPar.At(n, 4, 0) ) << std::endl;
-#endif
-      }
-
+	}
+      
       float totalAngPath=totalDistance*invcurvature;
       float& TD=totalDistance;
       float& TP=totalAngPath;
-
+      
 #ifdef DEBUG
       if (dump) std::cout << "TD=" << TD << " TP=" << TP << " arrived at r=" << sqrt(outPar.At(n, 0, 0)*outPar.At(n, 0, 0)+outPar.At(n, 1, 0)*outPar.At(n, 1, 0)) << std::endl;
 #endif
-
+      
       float cosTP = cos(TP);
       float sinTP = sin(TP);
       // float cosTP, sinTP;
       // sincos4(TP, sinTP, cosTP);
-
+      
 #ifdef DEBUG
-   if (dump) {
-     std::cout 
-       << " dTDdx=" << dTDdx
-       << " dTDdy=" << dTDdy
-       << " dTPdx=" << dTPdx
-       << " dTPdy=" << dTPdy
-       << " dTPdpx=" << dTPdpx
-       << " dTPdpy=" << dTPdpy
-       << " sinTP=" << sinTP
-       << " cosTP=" << cosTP
-       << " TD=" << TD
-       << std::endl;
-   }
+      if (dump) {
+	std::cout 
+	  << " dTDdx=" << dTDdx
+	  << " dTDdy=" << dTDdy
+	  << " dTPdx=" << dTPdx
+	  << " dTPdy=" << dTPdy
+	  << " dTPdpx=" << dTPdpx
+	  << " dTPdpy=" << dTPdpy
+	  << " sinTP=" << sinTP
+	  << " cosTP=" << cosTP
+	  << " TD=" << TD
+	  << std::endl;
+      }
 #endif
-
       //assume total path length s as given and with no uncertainty
       float p = pt2 + pzin*pzin;
       p = sqrt(p);
       float s = TD*p*ptinv;
-      // std::cout << "total path s=" << s << std::endl;
-      // TD = s*pt/p;
-      // TP = TD/(pt*k) = s/(p*k);
-      float dTPdpx = -s*pxin/(k*p*p*p);
-      float dTPdpy = -s*pyin/(k*p*p*p);
-      float dTPdpz = -s*pzin/(k*p*p*p);
+      computeJacobian(n, errorProp, s, k, p, pxin, pyin, pzin, TP, cosTP, sinTP);
+    }
+}
 
-      //derive these to compute jacobian
-      //x = xin + k*(pxin*sinTP-pyin*(1-cosTP));
-      //y = yin + k*(pyin*sinTP+pxin*(1-cosTP));
-      //z = zin + k*TP*pzin;
-      //px = pxin*cosTP-pyin*sinTP;
-      //py = pyin*cosTP+pxin*sinTP;
-      //pz = pzin;
-      //jacobian
+void helixAtRFromIntersection(const MPlexLV& inPar, const MPlexQI& inChg, MPlexLV& outPar, MPlexQF &msRad, MPlexLL& errorProp) {
 
-      errorProp(n,0,0) = 1.;	                                                 //dxdx
-      errorProp(n,0,1) = 0.;	                                                 //dxdy
-      errorProp(n,0,2) = 0.;                                                     //dxdz
-      errorProp(n,0,3) = k*(sinTP + pxin*cosTP*dTPdpx - pyin*sinTP*dTPdpx);      //dxdpx
-      errorProp(n,0,4) = k*(pxin*cosTP*dTPdpy - 1. + cosTP - pyin*sinTP*dTPdpy); //dxdpy
-      errorProp(n,0,5) = k*dTPdpz*(pxin*cosTP - pyin*sinTP);                     //dxdpz
-      errorProp(n,1,0) = 0.;	                                                 //dydx
-      errorProp(n,1,1) = 1.;	                                                 //dydy
-      errorProp(n,1,2) = 0.;                                                     //dydz
-      errorProp(n,1,3) = k*(pyin*cosTP*dTPdpx + 1. - cosTP + pxin*sinTP*dTPdpx); //dydpx
-      errorProp(n,1,4) = k*(sinTP + pyin*cosTP*dTPdpy + pxin*sinTP*dTPdpy);      //dydpy
-      errorProp(n,1,5) = k*dTPdpz*(pyin*cosTP + pxin*sinTP);                     //dydpz
-      errorProp(n,2,0) = 0.;	                                                 //dzdx
-      errorProp(n,2,1) = 0.;	                                                 //dzdy
-      errorProp(n,2,2) = 1.;                                                     //dzdz
-      errorProp(n,2,3) = k*pzin*dTPdpx;                                          //dzdpx
-      errorProp(n,2,4) = k*pzin*dTPdpy;                                          //dzdpy
-      errorProp(n,2,5) = k*(TP + dTPdpz*pzin);                                   //dzdpz
-      errorProp(n,3,0) = 0.;	                                                 //dpxdx
-      errorProp(n,3,1) = 0.;	                                                 //dpxdy
-      errorProp(n,3,2) = 0.;                                                     //dpxdz
-      errorProp(n,3,3) = cosTP - dTPdpx*(pxin*sinTP + pyin*cosTP);               //dpxdpx
-      errorProp(n,3,4) = -sinTP - dTPdpy*(pxin*sinTP + pyin*cosTP);              //dpxdpy
-      errorProp(n,3,5) = -dTPdpz*(pxin*sinTP + pyin*cosTP);                      //dpxdpz
-      errorProp(n,4,0) = 0.;                                                     //dpydx
-      errorProp(n,4,1) = 0.;	                                                 //Dpydyd
-      errorProp(n,4,2) = 0.;                                                     //dpydz
-      errorProp(n,4,3) = +sinTP - dTPdpx*(pyin*sinTP - pxin*cosTP);              //dpydpx
-      errorProp(n,4,4) = +cosTP - dTPdpy*(pyin*sinTP - pxin*cosTP);              //dpydpy
-      errorProp(n,4,5) = -dTPdpz*(pyin*sinTP - pxin*cosTP);                      //dpydpz
-      errorProp(n,5,0) = 0.;                                                     //dpzdx
-      errorProp(n,5,1) = 0.;							 //dpzdy
-      errorProp(n,5,2) = 0.;							 //dpzdz 
-      errorProp(n,5,3) = 0.;							 //dpzdpx
-      errorProp(n,5,4) = 0.;							 //dpzdpy
-      errorProp(n,5,5) = 1.;							 //dpzdpz
-
-   }
-
-#ifdef DEBUG
-   if (dump) {
-     for (int kk = 0; kk < N; ++kk)
-     {
-       printf("outErr before prop %d\n", kk);
-       for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-           printf("%8f ", outErr.At(kk,i,j)); printf("\n");
-       } printf("\n");
-
-       printf("errorProp %d\n", kk);
-       for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-           printf("%8f ", errorProp.At(kk,i,j)); printf("\n");
-       } printf("\n");
-
-     }
-   }
-#endif
-
-   // Matriplex version of:
-   // result.errors = ROOT::Math::Similarity(errorProp, outErr);
-   MPlexLL temp;
-   MultHelixPropGC      (errorProp, outErr, temp);
-   MultHelixPropTranspGC(errorProp, temp,   outErr);
-   
-   // This dump is now out of its place as similarity is done with matriplex ops.
-#ifdef DEBUG
-   if (dump) {
-     for (int kk = 0; kk < N; ++kk)
-     {
-       printf("outErr %d\n", kk);
-       for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-           printf("%8f ", outErr.At(kk,i,j)); printf("\n");
-       } printf("\n");
-
-       printf("outPar %d\n", kk);
-       for (int i = 0; i < 6; ++i) {
-           printf("%8f ", outPar.At(kk,i,0)); printf("\n");
-       } printf("\n");
-     }
-   }
-#endif
-
-   //we deal with material only once (fixme)
-   // outErr.AddNoiseIntoUpperLeft3x3(0.1); // e.g. ? 0.0008
-
-  //add multiple scattering uncertainty and energy loss
 #pragma simd
-   for (int n = 0; n < N; ++n)
-   {
+  for (int n = 0; n < NN; ++n)
+    {
+      const float& xin  = inPar.ConstAt(n, 0, 0);
+      const float& yin  = inPar.ConstAt(n, 1, 0);
+      const float& zin  = inPar.ConstAt(0, 2, 0);
+      const float& pxin = inPar.ConstAt(n, 3, 0);
+      const float& pyin = inPar.ConstAt(n, 4, 0);
+      const float& pzin = inPar.ConstAt(n, 5, 0);
+      
+      float rout = msRad.ConstAt(n, 0, 0);
+      float r0in = hipo(xin, yin);
+      
+#ifdef DEBUG
+      if (dump) std::cout << "attempt propagation from r=" << r0in << " to r=" << r << std::endl;
+      if (dump) std::cout << "x=" << xin << " y=" << yin  << " z=" << inPar.ConstAt(n, 2, 0) << " px=" << pxin << " py=" << pyin << " pz=" << pzin << " q=" << inChg.ConstAt(n, 0, 0) << std::endl;
+      // if ((r0in-r)>=0) {
+      //    if (dump) std::cout << "target radius same or smaller than starting point, returning input" << std::endl;
+      //    return;
+      // }
+#endif
+      
+      float pt2    = pxin*pxin+pyin*pyin;
+      float pt     = sqrt(pt2);
+      float ptinv  = 1./pt;
+      float pt2inv = ptinv*ptinv;
+      //p=0.3Br => r=p/(0.3*B)
+      float k = inChg.ConstAt(n, 0, 0) * 100. / (-0.299792458*3.8112);
+      float curvature = pt*k;//in cm
+      float invcurvature = 1./(curvature);//in 1./cm
+      
+#ifdef DEBUG
+      if (dump) std::cout << "curvature=" << 1./invcurvature << std::endl;
+#endif
+      
+      //coordinates of center of circle defined as helix projection on transverse plane 
+      float xc = xin - curvature*pyin/pt;
+      float yc = yin + curvature*pxin/pt;
+      float rc = sqrt(xc*xc+yc*yc);
+      
+      float TP, x, y = 0.;
+      if (fabs(xc)>fabs(yc)) {
+	//solve for x since yc!=0
+	float A = 1 + xc*xc/(yc*yc);
+	float B = -(rout*rout + rc*rc - curvature*curvature)*xc/(yc*yc);
+	float C = (rout*rout + rc*rc - curvature*curvature)*(rout*rout + rc*rc - curvature*curvature)/(4*yc*yc) - rout*rout;
+	//first solution
+	float x_p = ( -B + sqrt(B*B - 4*A*C) ) / (2*A);
+	float y_p = -x_p*xc/yc + (rout*rout + rc*rc - curvature*curvature)/(2*yc);
+	float cosDelta_p = (pxin*x_p + pxin*x_p)/(pt*rout);
+	//second solution
+	float x_m = ( -B - sqrt(B*B - 4*A*C) ) / (2*A);
+	float y_m = -x_m*xc/yc + (rout*rout + rc*rc - curvature*curvature)/(2*yc);
+	float cosDelta_m = (pxin*x_m + pxin*x_m)/(pt*rout);
+	//arbitrate based on momentum and vector connecting the end points
+	if ( (rout>r0in) ? (cosDelta_p > cosDelta_m) : (cosDelta_p < cosDelta_m)) { 
+	  float chord_p = sqrt( (x_p-xin)*(x_p-xin) + (y_p-yin)*(y_p-yin) );
+	  float sinTPHalf_p = 0.5*chord_p*invcurvature;
+	  TP = 2*asin(sinTPHalf_p);
+	} else {
+	  float chord_m = sqrt( (x_m-xin)*(x_m-xin) + (y_m-yin)*(y_m-yin) );
+	  float sinTPHalf_m = 0.5*chord_m*invcurvature;
+	  TP = 2*asin(sinTPHalf_m);
+	} 
+      } else {
+	//solve for y since xc!=0
+	float A = 1 + yc*yc/(xc*xc);
+	float B = -(rout*rout + rc*rc - curvature*curvature)*yc/(xc*xc);
+	float C = (rout*rout + rc*rc - curvature*curvature)*(rout*rout + rc*rc - curvature*curvature)/(4*xc*xc) - rout*rout;
+	//first solution
+	float y_p = ( -B + sqrt(B*B - 4*A*C) ) / (2*A);
+	float x_p = -y_p*yc/xc + (rout*rout + rc*rc - curvature*curvature)/(2*xc);
+	float cosDelta_p = (pxin*x_p + pxin*x_p)/(pt*rout);
+	//second solution
+	float y_m = ( -B - sqrt(B*B - 4*A*C) ) / (2*A);
+	float x_m = -y_m*yc/xc + (rout*rout + rc*rc - curvature*curvature)/(2*xc);
+	float cosDelta_m = (pxin*x_m + pxin*x_m)/(pt*rout);
+	//arbitrate based on momentum and vector connecting the end points
+	if ( (rout>r0in) ? (cosDelta_p > cosDelta_m) : (cosDelta_p < cosDelta_m)) { 
+	  float chord_p = sqrt( (x_p-xin)*(x_p-xin) + (y_p-yin)*(y_p-yin) );
+	  float sinTPHalf_p = 0.5*chord_p*invcurvature;
+	  TP = 2*asin(sinTPHalf_p);
+	} else {
+	  float chord_m = sqrt( (x_m-xin)*(x_m-xin) + (y_m-yin)*(y_m-yin) );
+	  float sinTPHalf_m = 0.5*chord_m*invcurvature;
+	  TP = 2*asin(sinTPHalf_m);
+	} 
+      }
+      
+      float cosTP=cos(TP);
+      float sinTP=sin(TP);
+      //helix propagation formulas
+      //http://www.phys.ufl.edu/~avery/fitting/fitting4.pdf
+      outPar.At(n, 0, 0) = xin + k*(pxin*sinTP-pyin*(1-cosTP));
+      outPar.At(n, 1, 0) = yin + k*(pyin*sinTP+pxin*(1-cosTP));
+      outPar.At(n, 2, 0) = zin + k*TP*pzin;
+      outPar.At(n, 3, 0) = pxin*cosTP-pyin*sinTP;
+      outPar.At(n, 4, 0) = pyin*cosTP+pxin*sinTP;
+      //outPar.At(n, 5, 0) = pzin; //take this out as it is redundant
+      
+      float p = pt2 + pzin*pzin;
+      p=sqrt(p);
+      float s = TP*curvature*p*ptinv;
+      computeJacobian(n, errorProp, s, k, p, pxin, pyin, pzin, TP, cosTP, sinTP);
+    }
+}
+
+void applyMaterialEffects(const MPlexQF &hitsRl, const MPlexQF& hitsXi, MPlexLS &outErr, MPlexLV& outPar) {
+
+#pragma simd
+  for (int n = 0; n < NN; ++n)
+    {
       float radL = hitsRl.ConstAt(n,0,0);
       if (radL<0.0000000000001) continue;
       const float& x = outPar.ConstAt(n,0,0);
@@ -458,7 +510,79 @@ void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
       outPar.At(n, 0, 5) -= dP*pz/p;
       //we do nothing on the uncertainty for now
     }
- 
+
+}
+
+void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
+                            const MPlexQI &inChg,  const MPlexHV& msPar, 
+			    const MPlexQF &hitsRl, const MPlexQF& hitsXi,
+                                  MPlexLS &outErr,       MPlexLV& outPar)
+{
+#ifdef DEBUG
+  const bool dump = false;
+#endif
+
+   const idx_t N  = NN;
+
+   outErr = inErr;
+   outPar = inPar;
+
+   MPlexLL errorProp;
+
+   MPlexQF msRad;
+#pragma simd
+   for (int n = 0; n < N; ++n) {
+     msRad.At(n, 0, 0) = hipo(msPar.ConstAt(n, 0, 0), msPar.ConstAt(n, 1, 0));
+   }
+
+   helixAtRFromIterative(inPar, inChg, outPar, msRad, errorProp);
+   // helixAtRFromIntersection(inPar, inChg, outPar, msRad, errorProp);
+
+#ifdef DEBUG
+   if (dump) {
+     for (int kk = 0; kk < N; ++kk)
+     {
+       printf("outErr before prop %d\n", kk);
+       for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
+           printf("%8f ", outErr.At(kk,i,j)); printf("\n");
+       } printf("\n");
+
+       printf("errorProp %d\n", kk);
+       for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
+           printf("%8f ", errorProp.At(kk,i,j)); printf("\n");
+       } printf("\n");
+
+     }
+   }
+#endif
+
+   // Matriplex version of:
+   // result.errors = ROOT::Math::Similarity(errorProp, outErr);
+   MPlexLL temp;
+   MultHelixPropGC      (errorProp, outErr, temp);
+   MultHelixPropTranspGC(errorProp, temp,   outErr);
+   
+   // This dump is now out of its place as similarity is done with matriplex ops.
+#ifdef DEBUG
+   if (dump) {
+     for (int kk = 0; kk < N; ++kk)
+     {
+       printf("outErr %d\n", kk);
+       for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
+           printf("%8f ", outErr.At(kk,i,j)); printf("\n");
+       } printf("\n");
+
+       printf("outPar %d\n", kk);
+       for (int i = 0; i < 6; ++i) {
+           printf("%8f ", outPar.At(kk,i,0)); printf("\n");
+       } printf("\n");
+     }
+   }
+#endif
+
+   //add multiple scattering uncertainty and energy loss
+   applyMaterialEffects(hitsRl, hitsXi, outErr, outPar);   
+
    /*
      if (fabs(sqrt(outPar[0]*outPar[0]+outPar[1]*outPar[1])-r)>0.0001) {
      std::cout << "DID NOT GET TO R, dR=" << fabs(sqrt(outPar[0]*outPar[0]+outPar[1]*outPar[1])-r)
@@ -482,182 +606,15 @@ void propagateHelixToRMPlex(const MPlexLS& inErr,  const MPlexLV& inPar,
 
    MPlexLL errorProp;
 
+
+   MPlexQF msRad;
 #pragma simd
-   for (int n = 0; n < N_proc; ++n)
-   {
-      const float& xin  = inPar.ConstAt(n, 0, 0);
-      const float& yin  = inPar.ConstAt(n, 1, 0);
-      const float& pxin = inPar.ConstAt(n, 3, 0);
-      const float& pyin = inPar.ConstAt(n, 4, 0);
-      const float& pzin = inPar.ConstAt(n, 5, 0);
-
-#ifdef DEBUG
-      std::cout << "propagate track from x=" << xin << " y=" << yin << " using vecunit=" << n << std::endl;
-#endif
-
-      float r0in = hipo(xin, yin);
-
-#ifdef DEBUG
-      if (dump) std::cout << "attempt propagation from r=" << r0in << " to r=" << r << std::endl;
-      if (dump) std::cout << "x=" << xin << " y=" << yin << " px=" << pxin << " py=" << pyin << " pz=" << pzin << " q=" << inChg.ConstAt(n, 0, 0) << std::endl;
-      if ((r0in-r)>=0) {
-         if (dump) std::cout << "target radius same or smaller than starting point, returning input" << std::endl;
-         return;
-      }
-#endif
-
-      float pt2    = pxin*pxin+pyin*pyin;
-      float pt     = sqrt(pt2);
-      float ptinv  = 1./pt;
-      float pt2inv = ptinv*ptinv;
-      //p=0.3Br => r=p/(0.3*B)
-      float k = inChg.ConstAt(n, 0, 0) * 100. / (-0.299792458*3.8112);
-      float invcurvature = 1./(pt*k);//in 1./cm
-
-#ifdef DEBUG
-      if (dump) std::cout << "curvature=" << 1./invcurvature << std::endl;
-#endif
-
-      float ctgTheta=pzin*ptinv;
-      //variables to be updated at each iterations
-      //derivatives initialized to value for first iteration, i.e. distance = r-r0in
-      float totalDistance = 0;
-      //temporaries used within the loop (declare here to reduce memory operations)
-      float x = 0.;
-      float y = 0.;
-      float px = 0.;
-      float py = 0.;
-      float r0 = 0.;
-      float angPath = 0.;//maybe this temporary can be removed?
-      float cosAP=0.;
-      float sinAP=0.;
-      // float dxdvar = 0.;
-      // float dydvar = 0.;
-      //5 iterations is a good starting point
-      //const unsigned int Niter = 10;
-      // const unsigned int Niter = 5+std::round(r-r0)/2;
-      for (unsigned int i=0;i<Config::Niter;++i)
-      {
-#ifdef DEBUG
-         if (dump) std::cout << "propagation iteration #" << i << std::endl;
-#endif
-
-         x  = outPar.At(n, 0, 0);
-         y  = outPar.At(n, 1, 0);
-         px = outPar.At(n, 3, 0);
-         py = outPar.At(n, 4, 0);
-         r0 = hipo(outPar.At(n, 0, 0), outPar.At(n, 1, 0));
-
-#ifdef DEBUG
-         if (dump) std::cout << "r0=" << r0 << " pt=" << pt << std::endl;
-         if (dump) {
-            if (r==r0) {
-               std::cout << "distance = 0 at iteration=" << i << std::endl;
-               break;
-            }
-         }
-#endif
-
-         //distance=r-r0;//remove temporary
-         totalDistance+=(r-r0);
-#ifdef DEBUG
-         if (dump) std::cout << "distance=" << (r-r0) << std::endl;
-#endif
-         angPath = (r-r0)*invcurvature;
-#ifdef DEBUG
-         if (dump) std::cout << "angPath=" << angPath << std::endl;
-#endif
-
-         cosAP=cos(angPath);
-         sinAP=sin(angPath);
-         // sincos4(angPath, sinAP, cosAP);
-
-         //helix propagation formulas
-         //http://www.phys.ufl.edu/~avery/fitting/fitting4.pdf
-         outPar.At(n, 0, 0) = outPar.At(n, 0, 0) + k*(px*sinAP-py*(1-cosAP));
-         outPar.At(n, 1, 0) = outPar.At(n, 1, 0) + k*(py*sinAP+px*(1-cosAP));
-         outPar.At(n, 2, 0) = outPar.At(n, 2, 0) + (r-r0)*ctgTheta;
-         outPar.At(n, 3, 0) = px*cosAP-py*sinAP;
-         outPar.At(n, 4, 0) = py*cosAP+px*sinAP;
-         //outPar.At(n, 5, 0) = pz; //take this out as it is redundant
-
-#ifdef DEBUG
-         if (dump) std::cout << outPar.At(n, 0, 0) << " " << outPar.At(n, 1, 0) << " " << outPar.At(n, 2, 0) << std::endl;
-         if (dump) std::cout << outPar.At(n, 3, 0) << " " << outPar.At(n, 4, 0) << " " << outPar.At(n, 5, 0) << std::endl;
-#endif
-      }
-
-      float totalAngPath=totalDistance*invcurvature;
-      float& TD=totalDistance;
-      float& TP=totalAngPath;
-
-#ifdef DEBUG
-      if (dump) std::cout << "TD=" << TD << " TP=" << TP << " arrived at r=" << sqrt(outPar.At(n, 0, 0)*outPar.At(n, 0, 0)+outPar.At(n, 1, 0)*outPar.At(n, 1, 0)) << std::endl;
-#endif
-
-      float cosTP = cos(TP);
-      float sinTP = sin(TP);
-      // float cosTP, sinTP;
-      // sincos4(TP, sinTP, cosTP);
-
-      //assume total path length s as given and with no uncertainty
-      float p = pt2 + pzin*pzin;
-      p = sqrt(p);
-      float s = TD*p*ptinv;
-      // std::cout << "total path s=" << s << std::endl;
-      // TD = s*pt/p;
-      // TP = TD/(pt*k) = s/(p*k);
-      float dTPdpx = -s*pxin/(k*p*p*p);
-      float dTPdpy = -s*pyin/(k*p*p*p);
-      float dTPdpz = -s*pzin/(k*p*p*p);
-
-      //derive these to compute jacobian
-      //x = xin + k*(pxin*sinTP-pyin*(1-cosTP));
-      //y = yin + k*(pyin*sinTP+pxin*(1-cosTP));
-      //z = zin + TD*ctgTheta;
-      //px = pxin*cosTP-pyin*sinTP;
-      //py = pyin*cosTP+pxin*sinTP;
-      //pz = pzin;
-      //jacobian
-
-      errorProp(n,0,0) = 1.;	                                                 //dxdx
-      errorProp(n,0,1) = 0.;	                                                 //dxdy
-      errorProp(n,0,2) = 0.;                                                     //dxdz
-      errorProp(n,0,3) = k*(sinTP + pxin*cosTP*dTPdpx - pyin*sinTP*dTPdpx);      //dxdpx
-      errorProp(n,0,4) = k*(pxin*cosTP*dTPdpy - 1. + cosTP - pyin*sinTP*dTPdpy); //dxdpy
-      errorProp(n,0,5) = k*dTPdpz*(pxin*cosTP - pyin*sinTP);                     //dxdpz
-      errorProp(n,1,0) = 0.;	                                                 //dydx
-      errorProp(n,1,1) = 1.;	                                                 //dydy
-      errorProp(n,1,2) = 0.;                                                     //dydz
-      errorProp(n,1,3) = k*(pyin*cosTP*dTPdpx + 1. - cosTP + pxin*sinTP*dTPdpx); //dydpx
-      errorProp(n,1,4) = k*(sinTP + pyin*cosTP*dTPdpy + pxin*sinTP*dTPdpy);      //dydpy
-      errorProp(n,1,5) = k*dTPdpz*(pyin*cosTP + pxin*sinTP);                     //dydpz
-      errorProp(n,2,0) = 0.;	                                                 //dzdx
-      errorProp(n,2,1) = 0.;	                                                 //dzdy
-      errorProp(n,2,2) = 1.;                                                     //dzdz
-      errorProp(n,2,3) = k*pzin*dTPdpx;                                          //dzdpx
-      errorProp(n,2,4) = k*pzin*dTPdpy;                                          //dzdpy
-      errorProp(n,2,5) = k*(TP + dTPdpz*pzin);                                   //dzdpz
-      errorProp(n,3,0) = 0.;	                                                 //dpxdx
-      errorProp(n,3,1) = 0.;	                                                 //dpxdy
-      errorProp(n,3,2) = 0.;                                                     //dpxdz
-      errorProp(n,3,3) = cosTP - dTPdpx*(pxin*sinTP + pyin*cosTP);               //dpxdpx
-      errorProp(n,3,4) = -sinTP - dTPdpy*(pxin*sinTP + pyin*cosTP);              //dpxdpy
-      errorProp(n,3,5) = -dTPdpz*(pxin*sinTP + pyin*cosTP);                      //dpxdpz
-      errorProp(n,4,0) = 0.;                                                     //dpydx
-      errorProp(n,4,1) = 0.;	                                                 //Dpydyd
-      errorProp(n,4,2) = 0.;                                                     //dpydz
-      errorProp(n,4,3) = +sinTP - dTPdpx*(pyin*sinTP - pxin*cosTP);              //dpydpx
-      errorProp(n,4,4) = +cosTP - dTPdpy*(pyin*sinTP - pxin*cosTP);              //dpydpy
-      errorProp(n,4,5) = -dTPdpz*(pyin*sinTP - pxin*cosTP);                      //dpydpz
-      errorProp(n,5,0) = 0.;                                                     //dpzdx
-      errorProp(n,5,1) = 0.;							 //dpzdy
-      errorProp(n,5,2) = 0.;							 //dpzdz 
-      errorProp(n,5,3) = 0.;							 //dpzdpx
-      errorProp(n,5,4) = 0.;							 //dpzdpy
-      errorProp(n,5,5) = 1.;							 //dpzdpz
-
+   for (int n = 0; n < N_proc; ++n) {
+     msRad.At(n, 0, 0) = r;
    }
+
+   helixAtRFromIterative(inPar, inChg, outPar, msRad, errorProp);
+   // helixAtRFromIntersection(inPar, inChg, outPar, msRad, errorProp);
 
    // Matriplex version of:
    // result.errors = ROOT::Math::Similarity(errorProp, outErr);
