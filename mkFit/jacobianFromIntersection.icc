@@ -1,0 +1,287 @@
+#include "Matrix.h"
+
+void setJacobianSolveXPositive(float A,float B,float C, float Sx, 
+			       float xin, float yin, float pxin, float pyin, float pzin, 
+			       float xc, float yc, float x_p, float k, int n, MPlexLL& errorProp) {
+
+  //positive
+  errorProp(n,0,0) = ( -4*C*pow(xc,2) + 2*Sx*pow(xc,2)*(xc-2*x_p) + pow(B,2)*pow(yc,2) - B*(2*pow(xc,3) + Sx*pow(yc,2) - 2*A*xc*pow(yc,2)) ) / ( 2*A*Sx*xc*pow(yc,2) );
+  errorProp(n,0,1) = ( 4*C*pow(xc,4) + 4*Sx*pow(xc,4)*x_p + 2*B*(Sx-B)*pow(xc,2)*pow(yc,2) + 2*(Sx-B)*pow(xc,3)*pow(yc,2) + A*pow(B,2)*pow(yc,4) + 2*A*B*xc*pow(yc,4) ) / ( 2*A*Sx*pow(xc,2)*pow(yc,3) );
+  errorProp(n,0,2) = 0.;
+  errorProp(n,0,3) = k*( 4*C*pow(xc,4) + 4*Sx*pow(xc,4)*x_p - 2*(Sx-B)*pow(xc,3)*(k*pxin-yc)*yc + 2*B*(Sx-B)*pow(xc,2)*pow(yc,2) + A*pow(B,2)*pow(yc,4) + 2*A*B*xc*pow(yc,3)*(yc-k*pxin) ) / ( 2*A*Sx*pow(xc,2)*pow(yc,3) );
+  errorProp(n,0,4) = k*( 4*C*pow(xc,2) - 2*Sx*pow(xc,2)*(k*pyin+xc-2*x_p) - pow(B,2)*pow(yc,2) + B*(2*pow(xc,3)+Sx*pow(yc,2)-2*A*xc*pow(yc,2)+2*k*pyin*(pow(xc,2)-A*pow(yc,2)) ) ) / ( 2*A*Sx*xc*pow(yc,2) );
+  errorProp(n,0,5) = 0.;
+	  
+  errorProp(n,1,0) = ( 4*C*pow(xc,2) + 2*Sx*(2*pow(xc,2)*x_p-pow(xc,3)+A*pow(yc,2)*(xc-x_p)) - pow(B,2)*pow(yc,2) + B*(2*pow(xc,3) + Sx*pow(yc,2) - 2*A*xc*pow(yc,2)) ) / ( 2*A*Sx*pow(yc,3) );
+  errorProp(n,1,1) = ( -4*C*pow(xc,4) - 4*Sx*pow(xc,4)*x_p + 2*(B-Sx)*pow(xc,3)*pow(yc,2) + 2*pow(xc,2)*(pow(B,2)-B*Sx+A*Sx*x_p)*pow(yc,2) + A*B*(Sx-B)*pow(yc,4) + 2*A*(Sx-B)*xc*pow(yc,4) ) / ( 2*A*Sx*xc*pow(yc,4) );
+  errorProp(n,1,2) = 0.;
+  errorProp(n,1,3) = k*( -4*C*pow(xc,4) - 4*Sx*pow(xc,4)*x_p + 2*(Sx-B)*pow(xc,3)*(k*pxin-yc)*yc + 2*pow(xc,2)*(pow(B,2)-B*Sx+A*Sx*x_p)*pow(yc,2) - 2*A*(Sx-B)*xc*(k*pxin-yc)*pow(yc,3)+A*B*(Sx-B)*pow(yc,4) ) / ( 2*A*Sx*xc*pow(yc,4) );
+  errorProp(n,1,4) = k*( -4*C*pow(xc,2) + pow(B,2)*pow(yc,2) + 2*Sx*(pow(xc,3)-2*pow(xc,2)*x_p+A*(x_p-xc)*pow(yc,2)+k*pyin*(pow(xc,2)-A*pow(yc,2))) - B*(2*pow(xc,3)+Sx*pow(yc,2) - 2*A*xc*pow(yc,2) +2*k*pyin*(pow(xc,2)-A*pow(yc,2))) ) / ( 2*A*Sx*pow(yc,3) );
+  errorProp(n,1,5) = 0.;
+
+  errorProp(n,2,0) = (0.5*pzin*(2*(-xin + x_p)*(-1 + (-(B/xc) + (4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + (2*pow(xc,2))/pow(yc,2))/(2.*A) - (2*xc*x_p)/(A*pow(yc,2))) + 2*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + xc/yc - x_p/yc - (xc*(-(B/xc) + (4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + (2*pow(xc,2))/pow(yc,2)))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/(sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)));
+  errorProp(n,2,1) = (0.5*pzin*(2*(-xin + x_p)*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + ((2*B)/yc + (2*xc)/yc + ((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A)) + 2*(B/(2.*xc) - (2*pow(xc,3)*x_p)/(A*pow(yc,4)) + (xc*x_p)/pow(yc,2) - (xc*((2*B)/yc + (2*xc)/yc + ((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/(2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/(sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)));
+  errorProp(n,2,2) = 1.;
+  errorProp(n,2,3) = (2*k*pzin*((0.25*(2*(-xin + x_p)*((2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + ((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) + ((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A)) + 2*((B*k)/(2.*xc) - (2*k*pow(xc,3)*x_p)/(A*pow(yc,4)) + (k*xc*x_p)/pow(yc,2) + (-2*pow(k,2)*pxin + 2*k*yc)/(2.*yc) - (xc*((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) + ((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - (0.5*pxin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5))))/sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))));
+  errorProp(n,2,4) = (2*k*pzin*((0.25*(2*(-xin + x_p)*(((B*k)/xc + ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*A) + (2*k*xc*x_p)/(A*pow(yc,2))) + 2*((-2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + (-2*pow(k,2)*pyin - 2*k*xc)/(2.*yc) + (k*x_p)/yc - (xc*((B*k)/xc + ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2)))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - (0.5*pyin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5))))/sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))));
+  errorProp(n,2,5) = 2*k*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))));
+	  
+  errorProp(n,3,0) = (-0.5*pyin*(2*(-xin + x_p)*(-1 + (-(B/xc) + (4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + (2*pow(xc,2))/pow(yc,2))/(2.*A) - (2*xc*x_p)/(A*pow(yc,2))) + 2*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + xc/yc - x_p/yc - (xc*(-(B/xc) + (4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + (2*pow(xc,2))/pow(yc,2)))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin))*cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - (0.5*pxin*(2*(-xin + x_p)*(-1 + (-(B/xc) + (4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + (2*pow(xc,2))/pow(yc,2))/(2.*A) - (2*xc*x_p)/(A*pow(yc,2))) + 2*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + xc/yc - x_p/yc - (xc*(-(B/xc) + (4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + (2*pow(xc,2))/pow(yc,2)))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin))*sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)));
+  errorProp(n,3,1) = (-0.5*pyin*(2*(-xin + x_p)*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + ((2*B)/yc + (2*xc)/yc + ((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A)) + 2*(B/(2.*xc) - (2*pow(xc,3)*x_p)/(A*pow(yc,4)) + (xc*x_p)/pow(yc,2) - (xc*((2*B)/yc + (2*xc)/yc + ((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/(2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin))*cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - (0.5*pxin*(2*(-xin + x_p)*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + ((2*B)/yc + (2*xc)/yc + ((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A)) + 2*(B/(2.*xc) - (2*pow(xc,3)*x_p)/(A*pow(yc,4)) + (xc*x_p)/pow(yc,2) - (xc*((2*B)/yc + (2*xc)/yc + ((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/(2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin))*sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)));
+  errorProp(n,3,2) = 0.;
+  errorProp(n,3,3) = cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))) - (2*pyin*((0.25*(2*(-xin + x_p)*((2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + ((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) + ((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A)) + 2*((B*k)/(2.*xc) - (2*k*pow(xc,3)*x_p)/(A*pow(yc,4)) + (k*xc*x_p)/pow(yc,2) + (-2*pow(k,2)*pxin + 2*k*yc)/(2.*yc) - (xc*((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) + ((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - (0.5*pxin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5)))*cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2)))) - (2*pxin*((0.25*(2*(-xin + x_p)*((2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + ((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) + ((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A)) + 2*((B*k)/(2.*xc) - (2*k*pow(xc,3)*x_p)/(A*pow(yc,4)) + (k*xc*x_p)/pow(yc,2) + (-2*pow(k,2)*pxin + 2*k*yc)/(2.*yc) - (xc*((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) + ((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - (0.5*pxin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5)))*sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))));
+  errorProp(n,3,4) = (-2*pyin*((0.25*(2*(-xin + x_p)*(((B*k)/xc + ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*A) + (2*k*xc*x_p)/(A*pow(yc,2))) + 2*((-2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + (-2*pow(k,2)*pyin - 2*k*xc)/(2.*yc) + (k*x_p)/yc - (xc*((B*k)/xc + ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2)))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - (0.5*pyin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5)))*cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2)))) - sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))) - (2*pxin*((0.25*(2*(-xin + x_p)*(((B*k)/xc + ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*A) + (2*k*xc*x_p)/(A*pow(yc,2))) + 2*((-2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + (-2*pow(k,2)*pyin - 2*k*xc)/(2.*yc) + (k*x_p)/yc - (xc*((B*k)/xc + ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2)))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - (0.5*pyin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5)))*sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))));
+  errorProp(n,3,5) = 0.;
+
+  errorProp(n,4,0) = (0.5*pxin*(2*(-xin + x_p)*(-1 + (-(B/xc) + (4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + (2*pow(xc,2))/pow(yc,2))/(2.*A) - (2*xc*x_p)/(A*pow(yc,2))) + 2*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + xc/yc - x_p/yc - (xc*(-(B/xc) + (4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + (2*pow(xc,2))/pow(yc,2)))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin))*cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - (0.5*pyin*(2*(-xin + x_p)*(-1 + (-(B/xc) + (4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + (2*pow(xc,2))/pow(yc,2))/(2.*A) - (2*xc*x_p)/(A*pow(yc,2))) + 2*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + xc/yc - x_p/yc - (xc*(-(B/xc) + (4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + (2*pow(xc,2))/pow(yc,2)))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin))*sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)));
+  errorProp(n,4,1) = (0.5*pxin*(2*(-xin + x_p)*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + ((2*B)/yc + (2*xc)/yc + ((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A)) + 2*(B/(2.*xc) - (2*pow(xc,3)*x_p)/(A*pow(yc,4)) + (xc*x_p)/pow(yc,2) - (xc*((2*B)/yc + (2*xc)/yc + ((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/(2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin))*cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - (0.5*pyin*(2*(-xin + x_p)*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + ((2*B)/yc + (2*xc)/yc + ((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A)) + 2*(B/(2.*xc) - (2*pow(xc,3)*x_p)/(A*pow(yc,4)) + (xc*x_p)/pow(yc,2) - (xc*((2*B)/yc + (2*xc)/yc + ((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/(2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin))*sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)));
+  errorProp(n,4,2) = 0.;
+  errorProp(n,4,3) = (2*pxin*((0.25*(2*(-xin + x_p)*((2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + ((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) + ((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A)) + 2*((B*k)/(2.*xc) - (2*k*pow(xc,3)*x_p)/(A*pow(yc,4)) + (k*xc*x_p)/pow(yc,2) + (-2*pow(k,2)*pxin + 2*k*yc)/(2.*yc) - (xc*((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) + ((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - (0.5*pxin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5)))*cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2)))) + sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))) - (2*pyin*((0.25*(2*(-xin + x_p)*((2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + ((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) + ((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A)) + 2*((B*k)/(2.*xc) - (2*k*pow(xc,3)*x_p)/(A*pow(yc,4)) + (k*xc*x_p)/pow(yc,2) + (-2*pow(k,2)*pxin + 2*k*yc)/(2.*yc) - (xc*((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) + ((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - (0.5*pxin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5)))*sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))));
+  errorProp(n,4,4) = cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))) + (2*pxin*((0.25*(2*(-xin + x_p)*(((B*k)/xc + ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*A) + (2*k*xc*x_p)/(A*pow(yc,2))) + 2*((-2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + (-2*pow(k,2)*pyin - 2*k*xc)/(2.*yc) + (k*x_p)/yc - (xc*((B*k)/xc + ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2)))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - (0.5*pyin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5)))*cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2)))) - (2*pyin*((0.25*(2*(-xin + x_p)*(((B*k)/xc + ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*A) + (2*k*xc*x_p)/(A*pow(yc,2))) + 2*((-2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + (-2*pow(k,2)*pyin - 2*k*xc)/(2.*yc) + (k*x_p)/yc - (xc*((B*k)/xc + ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2)))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - (0.5*pyin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5)))*sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))));
+  errorProp(n,4,5) = 0.;
+
+  errorProp(n,5,0) = 0.;
+  errorProp(n,5,1) = 0.;
+  errorProp(n,5,2) = 0.;
+  errorProp(n,5,3) = 0.;
+  errorProp(n,5,4) = 0.;
+  errorProp(n,5,5) = 1.;
+
+}
+
+
+void setJacobianSolveXNegative(float A,float B,float C, float Sx, 
+			       float xin, float yin, float pxin, float pyin, float pzin, 
+			       float xc, float yc, float x_p, float k, int n, MPlexLL& errorProp) {
+
+  //negative
+
+  errorProp(n,0,0) = (4*C*pow(xc,2) + 2*sqrt(pow(B,2) - 4*A*C)*pow(xc,2)*(xc - 2*x_p) - pow(B,2)*pow(yc,2) + 
+	  B*(2*pow(xc,3) - sqrt(pow(B,2) - 4*A*C)*pow(yc,2) - 2*A*xc*pow(yc,2)))/(2.*A*sqrt(pow(B,2) - 4*A*C)*xc*pow(yc,2));
+  errorProp(n,0,1) = (-4*C*pow(xc,4) + 4*sqrt(pow(B,2) - 4*A*C)*pow(xc,4)*x_p + 2*B*(B + sqrt(pow(B,2) - 4*A*C))*pow(xc,2)*pow(yc,2) + 
+	  2*(B + sqrt(pow(B,2) - 4*A*C))*pow(xc,3)*pow(yc,2) - A*pow(B,2)*pow(yc,4) - 2*A*B*xc*pow(yc,4))/(2.*A*sqrt(pow(B,2) - 4*A*C)*pow(xc,2)*pow(yc,3));
+  errorProp(n,0,2) = 0.;
+  errorProp(n,0,3) = (k*(-4*C*pow(xc,4) + 4*sqrt(pow(B,2) - 4*A*C)*pow(xc,4)*x_p - 2*(B + sqrt(pow(B,2) - 4*A*C))*pow(xc,3)*(k*pxin - yc)*yc + 
+	      2*B*(B + sqrt(pow(B,2) - 4*A*C))*pow(xc,2)*pow(yc,2) + 2*A*B*xc*(k*pxin - yc)*pow(yc,3) - A*pow(B,2)*pow(yc,4)))/
+    (2.*A*sqrt(pow(B,2) - 4*A*C)*pow(xc,2)*pow(yc,3));
+  errorProp(n,0,4) = (k*(-4*C*pow(xc,2) - 2*sqrt(pow(B,2) - 4*A*C)*pow(xc,2)*(k*pyin + xc - 2*x_p) + pow(B,2)*pow(yc,2) + 
+	      B*(-2*k*pyin*pow(xc,2) - 2*pow(xc,3) + sqrt(pow(B,2) - 4*A*C)*pow(yc,2) + 2*A*k*pyin*pow(yc,2) + 2*A*xc*pow(yc,2))))/
+    (2.*A*sqrt(pow(B,2) - 4*A*C)*xc*pow(yc,2));
+  errorProp(n,0,5) = 0.;	  
+
+  errorProp(n,1,0) = (-4*C*pow(xc,2) + pow(B,2)*pow(yc,2) + B*(-2*pow(xc,3) + sqrt(pow(B,2) - 4*A*C)*pow(yc,2) + 2*A*xc*pow(yc,2)) + 
+	  2*sqrt(pow(B,2) - 4*A*C)*(-pow(xc,3) + 2*pow(xc,2)*x_p + A*xc*pow(yc,2) - A*x_p*pow(yc,2)))/(2.*A*sqrt(pow(B,2) - 4*A*C)*pow(yc,3));
+  errorProp(n,1,1) = (4*C*pow(xc,4) - 4*sqrt(pow(B,2) - 4*A*C)*pow(xc,4)*x_p - 2*(B + sqrt(pow(B,2) - 4*A*C))*pow(xc,3)*pow(yc,2) - 
+	  2*pow(xc,2)*(pow(B,2) + B*sqrt(pow(B,2) - 4*A*C) - A*sqrt(pow(B,2) - 4*A*C)*x_p)*pow(yc,2) + A*B*(B + sqrt(pow(B,2) - 4*A*C))*pow(yc,4) + 
+	  2*A*(B + sqrt(pow(B,2) - 4*A*C))*xc*pow(yc,4))/(2.*A*sqrt(pow(B,2) - 4*A*C)*xc*pow(yc,4));
+  errorProp(n,1,2) = 0.;
+  errorProp(n,1,3) = (k*(4*C*pow(xc,4) - 4*sqrt(pow(B,2) - 4*A*C)*pow(xc,4)*x_p + 2*(B + sqrt(pow(B,2) - 4*A*C))*pow(xc,3)*(k*pxin - yc)*yc - 
+	      2*pow(xc,2)*(pow(B,2) + B*sqrt(pow(B,2) - 4*A*C) - A*sqrt(pow(B,2) - 4*A*C)*x_p)*pow(yc,2) - 
+	      2*A*(B + sqrt(pow(B,2) - 4*A*C))*xc*(k*pxin - yc)*pow(yc,3) + A*B*(B + sqrt(pow(B,2) - 4*A*C))*pow(yc,4)))/
+    (2.*A*sqrt(pow(B,2) - 4*A*C)*xc*pow(yc,4));
+  errorProp(n,1,4) = (k*(4*C*pow(xc,2) - pow(B,2)*pow(yc,2) + 2*sqrt(pow(B,2) - 4*A*C)*
+	      (pow(xc,3) - 2*pow(xc,2)*x_p - A*xc*pow(yc,2) + A*x_p*pow(yc,2) + k*pyin*(pow(xc,2) - A*pow(yc,2))) + 
+	      B*(2*pow(xc,3) - sqrt(pow(B,2) - 4*A*C)*pow(yc,2) - 2*A*xc*pow(yc,2) + 2*k*pyin*(pow(xc,2) - A*pow(yc,2)))))/(2.*A*sqrt(pow(B,2) - 4*A*C)*pow(yc,3));
+  errorProp(n,1,5) = 0.;
+
+  errorProp(n,2,0) = (0.5*pzin*(2*(-xin + x_p)*(-1 + (-(B/xc) - (4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + 
+						      (2*pow(xc,2))/pow(yc,2))/(2.*A) - (2*xc*x_p)/(A*pow(yc,2))) + 
+				2*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + xc/yc - x_p/yc - (xc*(-(B/xc) - 
+											   (4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + (2*pow(xc,2))/pow(yc,2)))/(2.*A*yc))*
+				(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/
+    (sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*
+     sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)));
+  errorProp(n,2,1) = (0.5*pzin*(2*(-xin + x_p)*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + ((2*B)/yc + (2*xc)/yc - 
+								       ((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A))
+		    + 2*(B/(2.*xc) - (2*pow(xc,3)*x_p)/(A*pow(yc,4)) + (xc*x_p)/pow(yc,2) - 
+			 (xc*((2*B)/yc + (2*xc)/yc - ((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/
+			      (2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/
+    (sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*
+     sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)));
+  errorProp(n,2,2) = 1.;
+  errorProp(n,2,3) = (2*k*pzin*((0.25*(2*(-xin + x_p)*((2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + 
+					    ((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+					     ((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+					      4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A)) + 
+			    2*((B*k)/(2.*xc) - (2*k*pow(xc,3)*x_p)/(A*pow(yc,4)) + (k*xc*x_p)/pow(yc,2) + (-2*pow(k,2)*pxin + 2*k*yc)/(2.*yc) - 
+			       (xc*((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+				    ((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+				     4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*
+			    (-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - 
+		     (0.5*pxin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5))))/
+    sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))));
+  errorProp(n,2,4) = (2*k*pzin*((0.25*(2*(-xin + x_p)*(((B*k)/xc - ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + 
+							 (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*A) + 
+					    (2*k*xc*x_p)/(A*pow(yc,2))) + 2*((-2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + (-2*pow(k,2)*pyin - 2*k*xc)/(2.*yc) + (k*x_p)/yc - 
+									     (xc*((B*k)/xc - ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/
+										  (2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2)))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/
+		     (k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - 
+		     (0.5*pyin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5))))/
+    sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))));
+  errorProp(n,2,5) = 2*k*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))));
+	  
+  errorProp(n,3,0) = (-0.5*pyin*(2*(-xin + x_p)*(-1 + (-(B/xc) - (4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + 
+					    (2*pow(xc,2))/pow(yc,2))/(2.*A) - (2*xc*x_p)/(A*pow(yc,2))) + 
+		      2*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + xc/yc - x_p/yc - (xc*(-(B/xc) - 
+										 (4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + (2*pow(xc,2))/pow(yc,2)))/(2.*A*yc))*
+		      (-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin))*cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/
+									  (k*sqrt(pow(pxin,2) + pow(pyin,2))))))/
+    (k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*
+     sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - 
+    (0.5*pxin*(2*(-xin + x_p)*(-1 + (-(B/xc) - (4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + 
+				     (2*pow(xc,2))/pow(yc,2))/(2.*A) - (2*xc*x_p)/(A*pow(yc,2))) + 
+	       2*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + xc/yc - x_p/yc - (xc*(-(B/xc) - 
+									  (4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + (2*pow(xc,2))/pow(yc,2)))/(2.*A*yc))*
+	       (-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin))*sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/
+								   (k*sqrt(pow(pxin,2) + pow(pyin,2))))))/
+    (k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*
+     sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)));
+  errorProp(n,3,1) = (-0.5*pyin*(2*(-xin + x_p)*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + ((2*B)/yc + (2*xc)/yc - 
+									 ((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A)
+				      ) + 2*(B/(2.*xc) - (2*pow(xc,3)*x_p)/(A*pow(yc,4)) + (xc*x_p)/pow(yc,2) - 
+					     (xc*((2*B)/yc + (2*xc)/yc - ((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/
+						  (2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin))*
+	   cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/
+    (k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*
+     sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - 
+    (0.5*pxin*(2*(-xin + x_p)*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + ((2*B)/yc + (2*xc)/yc - 
+								  ((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A)
+			       ) + 2*(B/(2.*xc) - (2*pow(xc,3)*x_p)/(A*pow(yc,4)) + (xc*x_p)/pow(yc,2) - 
+				      (xc*((2*B)/yc + (2*xc)/yc - ((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/
+					   (2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin))*
+     sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/
+    (k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*
+     sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)));
+  errorProp(n,3,2) = 0.;
+  errorProp(n,3,3) = cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))) - 
+    (2*pyin*((0.25*(2*(-xin + x_p)*((2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + 
+				    ((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+				     ((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+				      4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A)) + 
+		    2*((B*k)/(2.*xc) - (2*k*pow(xc,3)*x_p)/(A*pow(yc,4)) + (k*xc*x_p)/pow(yc,2) + (-2*pow(k,2)*pxin + 2*k*yc)/(2.*yc) - 
+		       (xc*((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+			    ((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+			     4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*
+		    (-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - 
+	     (0.5*pxin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5)))*
+     cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/
+    sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2)))) - 
+    (2*pxin*((0.25*(2*(-xin + x_p)*((2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + 
+				    ((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+				     ((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+				      4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A)) + 
+		    2*((B*k)/(2.*xc) - (2*k*pow(xc,3)*x_p)/(A*pow(yc,4)) + (k*xc*x_p)/pow(yc,2) + (-2*pow(k,2)*pxin + 2*k*yc)/(2.*yc) - 
+		       (xc*((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+			    ((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+			     4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*
+		    (-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - 
+	     (0.5*pxin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5)))*
+     sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/
+    sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))));
+  errorProp(n,3,4) = (-2*pyin*((0.25*(2*(-xin + x_p)*(((B*k)/xc - ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + 
+							 (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*A) + 
+					    (2*k*xc*x_p)/(A*pow(yc,2))) + 2*((-2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + (-2*pow(k,2)*pyin - 2*k*xc)/(2.*yc) + (k*x_p)/yc - 
+									     (xc*((B*k)/xc - ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/
+										  (2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2)))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/
+		     (k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - 
+		     (0.5*pyin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5)))*
+	    cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/
+    sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2)))) - 
+    sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))) - 
+    (2*pxin*((0.25*(2*(-xin + x_p)*(((B*k)/xc - ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + 
+						 (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*A) + 
+				    (2*k*xc*x_p)/(A*pow(yc,2))) + 2*((-2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + (-2*pow(k,2)*pyin - 2*k*xc)/(2.*yc) + (k*x_p)/yc - 
+								     (xc*((B*k)/xc - ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/
+									  (2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2)))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/
+	     (k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - 
+	     (0.5*pyin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5)))*
+     sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/
+    sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))));
+  errorProp(n,3,5) = 0.;
+
+  errorProp(n,4,0) = (0.5*pxin*(2*(-xin + x_p)*(-1 + (-(B/xc) - (4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + 
+					   (2*pow(xc,2))/pow(yc,2))/(2.*A) - (2*xc*x_p)/(A*pow(yc,2))) + 
+		     2*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + xc/yc - x_p/yc - (xc*(-(B/xc) - 
+										(4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + (2*pow(xc,2))/pow(yc,2)))/(2.*A*yc))*
+		     (-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin))*cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/
+									 (k*sqrt(pow(pxin,2) + pow(pyin,2))))))/
+    (k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*
+     sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - 
+    (0.5*pyin*(2*(-xin + x_p)*(-1 + (-(B/xc) - (4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + 
+				     (2*pow(xc,2))/pow(yc,2))/(2.*A) - (2*xc*x_p)/(A*pow(yc,2))) + 
+	       2*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + xc/yc - x_p/yc - (xc*(-(B/xc) - 
+									  (4*A*B + (2*pow(B,2))/xc - (8*C*xc)/pow(yc,2) - (4*B*pow(xc,2))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) + (2*pow(xc,2))/pow(yc,2)))/(2.*A*yc))*
+	       (-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin))*sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/
+								   (k*sqrt(pow(pxin,2) + pow(pyin,2))))))/
+    (k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*
+     sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)));
+  errorProp(n,4,1) = (0.5*pxin*(2*(-xin + x_p)*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + ((2*B)/yc + (2*xc)/yc - 
+									((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A)
+				     ) + 2*(B/(2.*xc) - (2*pow(xc,3)*x_p)/(A*pow(yc,4)) + (xc*x_p)/pow(yc,2) - 
+					    (xc*((2*B)/yc + (2*xc)/yc - ((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/
+						 (2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin))*
+	   cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/
+    (k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*
+     sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - 
+    (0.5*pyin*(2*(-xin + x_p)*((2*pow(xc,2)*x_p)/(A*pow(yc,3)) + ((2*B)/yc + (2*xc)/yc - 
+								  ((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A)
+			       ) + 2*(B/(2.*xc) - (2*pow(xc,3)*x_p)/(A*pow(yc,4)) + (xc*x_p)/pow(yc,2) - 
+				      (xc*((2*B)/yc + (2*xc)/yc - ((8*C*pow(xc,2))/pow(yc,3) - (4*pow(B,2))/yc - (4*B*xc)/yc - 4*A*(-(pow(B,2)*yc)/(2.*pow(xc,2)) - (B*yc)/xc))/
+					   (2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin))*
+     sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/
+    (k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))))*
+     sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)));
+  errorProp(n,4,2) = 0.;
+  errorProp(n,4,3) = (2*pxin*((0.25*(2*(-xin + x_p)*((2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + ((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+										((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+										 4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A)) + 
+			   2*((B*k)/(2.*xc) - (2*k*pow(xc,3)*x_p)/(A*pow(yc,4)) + (k*xc*x_p)/pow(yc,2) + (-2*pow(k,2)*pxin + 2*k*yc)/(2.*yc) - 
+			      (xc*((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+				   ((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+				    4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*
+			   (-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - 
+		    (0.5*pxin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5)))*
+	    cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/
+    sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2)))) + 
+    sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))) - 
+    (2*pyin*((0.25*(2*(-xin + x_p)*((2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + 
+				    ((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+				     ((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+				      4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C)))/(2.*A)) + 
+		    2*((B*k)/(2.*xc) - (2*k*pow(xc,3)*x_p)/(A*pow(yc,4)) + (k*xc*x_p)/pow(yc,2) + (-2*pow(k,2)*pxin + 2*k*yc)/(2.*yc) - 
+		       (xc*((2*B*k)/yc - (xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+			    ((8*C*k*pow(xc,2))/pow(yc,3) - (4*pow(B,2)*k)/yc + (2*B*xc*(2*pow(k,2)*pxin - 2*k*yc))/pow(yc,2) - 
+			     4*A*(-(pow(B,2)*k*yc)/(2.*pow(xc,2)) - (B*(-2*pow(k,2)*pxin + 2*k*yc))/(2.*xc)))/(2.*sqrt(pow(B,2) - 4*A*C))))/(2.*A*yc))*
+		    (-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - 
+	     (0.5*pxin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5)))*
+     sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/
+    sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))));
+  errorProp(n,4,4) = cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))) + 
+    (2*pxin*((0.25*(2*(-xin + x_p)*(((B*k)/xc - ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + 
+						 (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*A) + 
+				    (2*k*xc*x_p)/(A*pow(yc,2))) + 2*((-2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + (-2*pow(k,2)*pyin - 2*k*xc)/(2.*yc) + (k*x_p)/yc - 
+								     (xc*((B*k)/xc - ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/
+									  (2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2)))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/
+	     (k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - 
+	     (0.5*pyin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5)))*
+     cos(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/
+    sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2)))) - 
+    (2*pyin*((0.25*(2*(-xin + x_p)*(((B*k)/xc - ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + 
+						 (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/(2.*A) + 
+				    (2*k*xc*x_p)/(A*pow(yc,2))) + 2*((-2*k*pow(xc,2)*x_p)/(A*pow(yc,3)) + (-2*pow(k,2)*pyin - 2*k*xc)/(2.*yc) + (k*x_p)/yc - 
+								     (xc*((B*k)/xc - ((-2*pow(B,2)*k)/xc + (2*A*B*(-2*pow(k,2)*pyin - 2*k*xc))/xc + (8*C*k*xc)/pow(yc,2) + (2*B*xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2))/
+									  (2.*sqrt(pow(B,2) - 4*A*C)) - (xc*(2*pow(k,2)*pyin + 2*k*xc))/pow(yc,2)))/(2.*A*yc))*(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin)))/
+	     (k*sqrt(pow(pxin,2) + pow(pyin,2))*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2))) - 
+	     (0.5*pyin*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*pow(pow(pxin,2) + pow(pyin,2),1.5)))*
+     sin(2*asin((0.5*sqrt(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(k*sqrt(pow(pxin,2) + pow(pyin,2))))))/
+    sqrt(1 - (0.25*(pow(-xin + x_p,2) + pow(-((xc*x_p)/yc) - (B*yc)/(2.*xc) - yin,2)))/(pow(k,2)*(pow(pxin,2) + pow(pyin,2))));
+  errorProp(n,4,5) = 0.;
+
+  errorProp(n,5,0) = 0.;
+  errorProp(n,5,1) = 0.;
+  errorProp(n,5,2) = 0.;
+  errorProp(n,5,3) = 0.;
+  errorProp(n,5,4) = 0.;
+  errorProp(n,5,5) = 1.;
+
+}

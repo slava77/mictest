@@ -255,8 +255,8 @@ void helixAtRFromIterative(const MPlexLV& inPar, const MPlexQI& inChg, MPlexLV& 
       //variables to be updated at each iterations
       float totalDistance = 0;
       //derivatives initialized to value for first iteration, i.e. distance = r-r0in
-      float dTDdx = (r0>0. ? -xin/r0 : 0.;
-      float dTDdy = (r0>0. ? -yin/r0 : 0.;
+      float dTDdx = r0>0. ? -xin/r0 : 0.;
+      float dTDdy = r0>0. ? -yin/r0 : 0.;
       float dTDdpx = 0.;
       float dTDdpy = 0.;
       //temporaries used within the loop (declare here to reduce memory operations)
@@ -467,6 +467,7 @@ void helixAtRFromIterative(const MPlexLV& inPar, const MPlexQI& inChg, MPlexLV& 
     }
 }
 
+#include "mkFit/jacobianFromIntersection.icc"
 void helixAtRFromIntersection(const MPlexLV& inPar, const MPlexQI& inChg, MPlexLV& outPar, const MPlexQF &msRad, MPlexLL& errorProp) {
 
 #pragma simd
@@ -517,7 +518,7 @@ void helixAtRFromIntersection(const MPlexLV& inPar, const MPlexQI& inChg, MPlexL
       float rc = sqrt(xc*xc+yc*yc);
       
       float TP, x, y = 0.;
-      if (fabs(xc)>fabs(yc)) {// || fabs(yc)>0.001
+      if (fabs(xc)>fabs(yc) || fabs(yc)>0.001) {
 	//solve for x since yc!=0
 	float A = 1 + xc*xc/(yc*yc);
 	float B = -(rout*rout + rc*rc - curvature*curvature)*xc/(yc*yc);
@@ -537,6 +538,7 @@ void helixAtRFromIntersection(const MPlexLV& inPar, const MPlexQI& inChg, MPlexL
 	std::cout << "xp=" << x_p << " y_p=" << y_p << " cosDelta_p=" << cosDelta_p << std::endl;
 	std::cout << "xm=" << x_m << " y_m=" << y_m << " cosDelta_m=" << cosDelta_m << std::endl;
 #endif 
+	float Sx = sqrt(B*B - 4*A*C);
 	//arbitrate based on momentum and vector connecting the end points
 	if ( (rout>r0in) ? (cosDelta_p > cosDelta_m) : (cosDelta_p < cosDelta_m)) { 
 	  float chord_p = sqrt( (x_p-xin)*(x_p-xin) + (y_p-yin)*(y_p-yin) );
@@ -548,6 +550,7 @@ void helixAtRFromIntersection(const MPlexLV& inPar, const MPlexQI& inChg, MPlexL
 	  std::cout << "pos solution" << std::endl;
 	  std::cout << "chord_p=" << chord_p << " sinTPHalf_p=" << sinTPHalf_p << " TP=" << TP << std::endl;
 #endif
+	  //setJacobianSolveXPositive(A, B, C, Sx, xin, yin, pxin, pyin, pzin, xc, yc, x_p, k, n, errorProp);
 	} else {
 	  float chord_m = sqrt( (x_m-xin)*(x_m-xin) + (y_m-yin)*(y_m-yin) );
 	  float sinTPHalf_m = 0.5*chord_m*invcurvature;
@@ -558,6 +561,7 @@ void helixAtRFromIntersection(const MPlexLV& inPar, const MPlexQI& inChg, MPlexL
 	  std::cout << "neg solution" << std::endl;
 	  std::cout << "chord_m=" << chord_m << " sinTPHalf_m=" << sinTPHalf_m << " TP=" << TP << std::endl;
 #endif
+	  //setJacobianSolveXPositive(A, B, C, Sx, xin, yin, pxin, pyin, pzin, xc, yc, x_m, k, n, errorProp);
 	} 
       } else {
 	//solve for y since xc!=0
@@ -579,6 +583,7 @@ void helixAtRFromIntersection(const MPlexLV& inPar, const MPlexQI& inChg, MPlexL
 	std::cout << "xp=" << x_p << " y_p=" << y_p << " cosDelta_p=" << cosDelta_p << std::endl;
 	std::cout << "xm=" << x_m << " y_m=" << y_m << " cosDelta_m=" << cosDelta_m << std::endl;
 #endif
+	float Sx = sqrt(B*B - 4*A*C);
 	//arbitrate based on momentum and vector connecting the end points
 	if ( (rout>r0in) ? (cosDelta_p > cosDelta_m) : (cosDelta_p < cosDelta_m)) { 
 	  float chord_p = sqrt( (x_p-xin)*(x_p-xin) + (y_p-yin)*(y_p-yin) );
@@ -586,12 +591,14 @@ void helixAtRFromIntersection(const MPlexLV& inPar, const MPlexQI& inChg, MPlexL
 	  TP = 2*asin(sinTPHalf_p);
 	  x = x_p;
 	  y = y_p;
+	  //setJacobianSolveXPositive(A, B, C, Sx, xin, yin, pxin, pyin, pzin, xc, yc, x_p, k, n, errorProp);
 	} else {
 	  float chord_m = sqrt( (x_m-xin)*(x_m-xin) + (y_m-yin)*(y_m-yin) );
 	  float sinTPHalf_m = 0.5*chord_m*invcurvature;
 	  TP = 2*asin(sinTPHalf_m);
 	  x = x_m;
 	  y = y_m;
+	  //setJacobianSolveXPositive(A, B, C, Sx, xin, yin, pxin, pyin, pzin, xc, yc, x_m, k, n, errorProp);
 	} 
       }
 
