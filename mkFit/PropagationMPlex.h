@@ -11,11 +11,12 @@ void propagateLineToRMPlex(const MPlexLS &psErr,  const MPlexLV& psPar,
 void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
                             const MPlexQI &inChg,  const MPlexHV& msPar,
 			    const MPlexQF &hitsRl, const MPlexQF& hitsXi,
-                                  MPlexLS &outErr,       MPlexLV& outPar);
+			          MPlexLS &outErr,       MPlexLV& outPar, 
+			    bool doIterative = true);
 
 void propagateHelixToRMPlex(const MPlexLS& inErr,  const MPlexLV& inPar,
                             const MPlexQI& inChg,  const float    r,
                                   MPlexLS& outErr,       MPlexLV& outPar,
-                            const int      N_proc);
+                            const int      N_proc, bool doIterative = true);
 
 #endif
