@@ -550,7 +550,7 @@ void helixAtRFromIntersection(const MPlexLV& inPar, const MPlexQI& inChg, MPlexL
 	  std::cout << "pos solution" << std::endl;
 	  std::cout << "chord_p=" << chord_p << " sinTPHalf_p=" << sinTPHalf_p << " TP=" << TP << std::endl;
 #endif
-	  //setJacobianSolveXPositive(A, B, C, Sx, xin, yin, pxin, pyin, pzin, xc, yc, x_p, k, n, errorProp);
+	  setJacobianSolveXPositive(A, B, C, Sx, xin, yin, pxin, pyin, pzin, xc, yc, x_p, k, n, errorProp);
 	} else {
 	  float chord_m = sqrt( (x_m-xin)*(x_m-xin) + (y_m-yin)*(y_m-yin) );
 	  float sinTPHalf_m = 0.5*chord_m*invcurvature;
@@ -561,7 +561,7 @@ void helixAtRFromIntersection(const MPlexLV& inPar, const MPlexQI& inChg, MPlexL
 	  std::cout << "neg solution" << std::endl;
 	  std::cout << "chord_m=" << chord_m << " sinTPHalf_m=" << sinTPHalf_m << " TP=" << TP << std::endl;
 #endif
-	  //setJacobianSolveXPositive(A, B, C, Sx, xin, yin, pxin, pyin, pzin, xc, yc, x_m, k, n, errorProp);
+	  setJacobianSolveXPositive(A, B, C, Sx, xin, yin, pxin, pyin, pzin, xc, yc, x_m, k, n, errorProp);
 	} 
       } else {
 	//solve for y since xc!=0
@@ -591,14 +591,14 @@ void helixAtRFromIntersection(const MPlexLV& inPar, const MPlexQI& inChg, MPlexL
 	  TP = 2*asin(sinTPHalf_p);
 	  x = x_p;
 	  y = y_p;
-	  //setJacobianSolveXPositive(A, B, C, Sx, xin, yin, pxin, pyin, pzin, xc, yc, x_p, k, n, errorProp);
+	  setJacobianSolveXPositive(A, B, C, Sx, xin, yin, pxin, pyin, pzin, xc, yc, x_p, k, n, errorProp);
 	} else {
 	  float chord_m = sqrt( (x_m-xin)*(x_m-xin) + (y_m-yin)*(y_m-yin) );
 	  float sinTPHalf_m = 0.5*chord_m*invcurvature;
 	  TP = 2*asin(sinTPHalf_m);
 	  x = x_m;
 	  y = y_m;
-	  //setJacobianSolveXPositive(A, B, C, Sx, xin, yin, pxin, pyin, pzin, xc, yc, x_m, k, n, errorProp);
+	  setJacobianSolveXPositive(A, B, C, Sx, xin, yin, pxin, pyin, pzin, xc, yc, x_m, k, n, errorProp);
 	} 
       }
 
