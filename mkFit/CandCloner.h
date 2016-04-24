@@ -31,7 +31,7 @@ private:
   // Temporaries in ProcessSeedRange(), re-sized/served  in constructor.
 
   // Size of this one is s_max_seed_range
-  std::vector<bounded_queue<Track> > t_cands_for_next_lay;
+  std::vector<std::vector<Track>> t_cands_for_next_lay;
 
 public:
   CandCloner(int cpuid=-1, int cpuid_st=-1, bool pin_mt=true)

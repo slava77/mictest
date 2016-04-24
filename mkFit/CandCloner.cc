@@ -23,7 +23,7 @@ void CandCloner::ProcessSeedRange(int is_beg, int is_end)
   //1) sort the candidates
   for (int is = is_beg; is < is_end; ++is)
   {
-    auto& hitsForSeed = m_hits_to_add[is];
+    auto& hitsForSeed = m_hits_to_add[is].rep();
     auto& cands = mp_etabin_of_comb_candidates->m_candidates;
 
 #ifdef DEBUG
@@ -48,12 +48,10 @@ void CandCloner::ProcessSeedRange(int is_beg, int is_end)
 
       for (int ih = 0; ih < num_hits; ih++)
       {
-        MkFitter::IdxChi2List h2a = hitsForSeed.top();
-        hitsForSeed.pop();
-        auto& newcv = cv.emplace_start(cands[ m_start_seed + is ][ h2a.trkIdx ]);
-        newcv.addHitIdx(h2a.hitIdx, 0);
-        newcv.setChi2(h2a.chi2);
-        cv.emplace_finish();
+        MkFitter::IdxChi2List &h2a = hitsForSeed[ih];
+        cv.push_back( cands[ m_start_seed + is ][ h2a.trkIdx ] );
+        cv.back().addHitIdx(h2a.hitIdx, 0);
+        cv.back().setChi2(h2a.chi2);
       }
 
       // Copy the best -2 cands back to the current list.
@@ -65,12 +63,12 @@ void CandCloner::ProcessSeedRange(int is_beg, int is_end)
         while (cur_m2 < max_m2 && ov[cur_m2].getLastHitIdx() != -2) ++cur_m2;
         while (cur_m2 < max_m2 && num_hits < Config::maxCandsPerSeed)
         {
-          cv.maybe_push( ov[cur_m2++] );
+          cv.push_back( ov[cur_m2++] );
           ++num_hits;
         }
       }
 
-      cands[ m_start_seed + is ].swap(cv.rep());
+      cands[ m_start_seed + is ].swap(cv);
       cv.clear();
     }
     // else
