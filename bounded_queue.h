@@ -35,7 +35,7 @@ public:
   }
   void emplace_finish() { std::push_heap(c.begin(), c.end(), comp); }
   void clear() { c.clear(); }
-  void swap(container_type& x) { c.swap(x); }
+  void swap(container_type& x) { c.swap(x); std::make_heap(c.begin(), c.end(), comp); }
   void reserve(size_type n) { c.reserve(n); }
   void maybe_push(const value_type& x) {
     if (size() < c.capacity()) {

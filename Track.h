@@ -154,7 +154,7 @@ public:
   void addHitIdx(int hitIdx,float chi2)
   {
     hitIdxArr_[++hitIdxPos_] = hitIdx;
-    if (hitIdx >= 0) ++nGoodHitIdx_; chi2_+=chi2;
+    if (hitIdx >= 0) { ++nGoodHitIdx_; chi2_+=chi2; }
   }
 
   int getHitIdx(int posHitIdx) const

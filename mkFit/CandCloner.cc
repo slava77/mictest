@@ -43,6 +43,7 @@ void CandCloner::ProcessSeedRange(int is_beg, int is_end)
 
     if ( ! hitsForSeed.empty())
     {
+      std::sort(hitsForSeed.begin(), hitsForSeed.end(), sortCandListByHitsChi2);
       int num_hits = std::min((int) hitsForSeed.size(), Config::maxCandsPerSeed);
       auto& cv = t_cands_for_next_lay[is - is_beg];
 
