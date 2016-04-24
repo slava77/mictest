@@ -233,6 +233,12 @@ private:
   bool isDuplicate_;
 };
 
+inline bool operator<(const Track& cand1, const Track& cand2)
+{
+  if (cand1.nFoundHits()==cand2.nFoundHits()) return cand1.chi2()<cand2.chi2();
+  return cand1.nFoundHits()>cand2.nFoundHits();
+}
+
 typedef std::vector<TrackExtra> TrackExtraVec;
 typedef std::vector<Track> TrackVec;
 typedef std::vector<TrackState> TSVec;

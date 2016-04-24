@@ -6,11 +6,20 @@
 #include "MkFitter.h"
 
 #include <vector>
+#include "bounded_queue.h"
 
 //#define CC_TIME_LAYER
 //#define CC_TIME_ETA
 
 typedef std::pair<int, int> CandClonerWork_t;
+
+inline bool operator<(const MkFitter::IdxChi2List& cand1,
+                      const MkFitter::IdxChi2List& cand2)
+{
+  if (cand1.nhits == cand2.nhits) return cand1.chi2 < cand2.chi2;
+  return cand1.nhits > cand2.nhits;
+}
+
 
 class CandCloner : public SideThread<CandClonerWork_t>
 {
@@ -22,7 +31,7 @@ private:
   // Temporaries in ProcessSeedRange(), re-sized/served  in constructor.
 
   // Size of this one is s_max_seed_range
-  std::vector<std::vector<Track> > t_cands_for_next_lay;
+  std::vector<bounded_queue<Track> > t_cands_for_next_lay;
 
 public:
   CandCloner(int cpuid=-1, int cpuid_st=-1, bool pin_mt=true)
@@ -60,10 +69,10 @@ public:
     m_hits_to_add.resize(n_seeds);
 
     // XXX Should resize vectors in m_hits_to_add to whatever makes sense ???
-    // for (int i = 0; i < n_seeds; ++i)
-    // {
-    //   m_hits_to_add[i].reserve(20 * Config::maxCandsPerSeed);
-    // }
+    for (int i = 0; i < n_seeds; ++i)
+    {
+      m_hits_to_add[i].reserve(Config::maxCandsPerSeed);
+    }
 
 #ifdef CC_TIME_ETA
     printf("CandCloner::begin_eta_bin\n");
@@ -92,8 +101,7 @@ public:
 
   void add_cand(int idx, const MkFitter::IdxChi2List& cand_info)
   {
-    m_hits_to_add[idx].push_back(cand_info);
-
+    m_hits_to_add[idx].maybe_push(cand_info);
     m_idx_max = std::max(m_idx_max, idx);
   }
 
@@ -170,7 +178,7 @@ public:
   // eventually, protected or private
 
   int  m_idx_max, m_idx_max_prev;
-  std::vector<std::vector<MkFitter::IdxChi2List>> m_hits_to_add;
+  std::vector<bounded_queue<MkFitter::IdxChi2List>> m_hits_to_add;
 
   EtaBinOfCombCandidates *mp_etabin_of_comb_candidates;
 
