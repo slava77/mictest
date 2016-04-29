@@ -48,6 +48,7 @@ public:
     }
   }
   Container& rep() { return c; }
+  void make_heap() { std::make_heap(c.begin(), c.end(), comp); }
 };
 
 #endif

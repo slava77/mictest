@@ -43,7 +43,7 @@ void CandCloner::ProcessSeedRange(int is_beg, int is_end)
 
     if ( ! hitsForSeed.empty())
     {
-      std::sort(hitsForSeed.begin(), hitsForSeed.end(), sortCandListByHitsChi2);
+      std::sort(hitsForSeed.begin(), hitsForSeed.end(), sortCandListByHitsChi2); // not a heap anymore
       int num_hits = std::min((int) hitsForSeed.size(), Config::maxCandsPerSeed);
       auto& cv = t_cands_for_next_lay[is - is_beg];
 
@@ -54,6 +54,7 @@ void CandCloner::ProcessSeedRange(int is_beg, int is_end)
         cv.back().addHitIdx(h2a.hitIdx, 0);
         cv.back().setChi2(h2a.chi2);
       }
+      m_hits_to_add[is].make_heap(); // restores heap
 
       // Copy the best -2 cands back to the current list.
       if (num_hits < Config::maxCandsPerSeed)
