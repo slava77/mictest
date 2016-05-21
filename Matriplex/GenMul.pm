@@ -384,7 +384,7 @@ sub handle_all_zeros_ones
   {
     my @zo;
 
-    push @zo, "#ifdef MIC_INTRINSICS";
+    push @zo, "#if MPLEX_INTRINSICS_WIDTH_BYTES == 64";
 
     push @zo, "$S->{vectype} all_zeros = { " . join(", ", (0) x 16) . " };"
         if $zeros;
