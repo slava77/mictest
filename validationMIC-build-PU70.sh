@@ -5,7 +5,7 @@ fin=${BIN_DATA_PATH}/PU70/10224.0_TTbar_13+TTbar_13TeV_TuneCUETP8M1_2017PU_GenSi
 
 runValidation()
 {
-    for sV in "sim " "see --cmssw-seeds"; do echo $sV | while read -r sN sO; do
+    for sV in "see --cmssw-seeds"; do echo $sV | while read -r sN sO; do
             for bV in "BH bh" "STD std" "CE ce"; do echo $bV | while read -r bN bO; do
 		    oBase=${base}_${sN}_${bN}
 		    nTH=8
@@ -19,7 +19,7 @@ runValidation()
     
     make clean
     
-    for opt in sim see
+    for opt in see
     do
         oBase=${base}_${opt}
         for build in BH STD CE

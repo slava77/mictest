@@ -9,7 +9,7 @@ ECP1=${BIN_DATA_PATH}/10muEta055to175Pt1to10/memoryFile.fv3.recT.072617.bin
 ECP2=${BIN_DATA_PATH}/10muEta17to24Pt1to10/memoryFile.fv3.recT.072617.bin
 
 runValidation(){
-    for sV in "sim " "see --cmssw-seeds"; do echo $sV | while read -r sN sO; do
+    for sV in "see --cmssw-seeds"; do echo $sV | while read -r sN sO; do
 	    for section in ECN2 ECN1 BRL ECP1 ECP2; do
 	        for bV in "BH bh" "STD std" "CE ce"; do echo $bV | while read -r bN bO; do
 		        oBase=${base}_${sN}_${section}_${bN}
@@ -25,7 +25,7 @@ runValidation(){
     
     make clean
     
-    for opt in sim see
+    for opt in see
     do
         for section in ECN2 ECN1 BRL ECP1 ECP2
         do
