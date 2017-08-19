@@ -237,7 +237,7 @@ namespace Config
   extern bool inclusiveShorts;
 
   // config on seed cleaning
-  constexpr double maxDR_seedclean = 0.005;
+  constexpr double maxDR_seedclean = 0.1;
   constexpr int minNHits_seedclean = 4;
   constexpr double track1GeVradius = 87.6; // = 1/(c*B)
 
