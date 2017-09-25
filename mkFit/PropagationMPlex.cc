@@ -3,6 +3,33 @@
 
 //#define DEBUG
 #include "Debug.h"
+#include "vdt/vdtMath.h"
+namespace {
+  inline double asin(double x){return vdt::fast_asin(x);}
+  inline float asinf(float x){return vdt::fast_asinf(x);}
+  inline float asin(float x){return vdt::fast_asinf(x);}
+  inline double atan(double x){return vdt::fast_atan(x);}
+  inline float atanf(float x){return vdt::fast_atanf(x);}
+  inline float atan(float x){return vdt::fast_atanf(x);}
+  inline double atan2(double x, double y){return vdt::fast_atan2(x, y);}
+  inline float atan2f(float x, float y){return vdt::fast_atan2f(x, y);}
+  inline float atan2(float x, float y){return vdt::fast_atan2f(x, y);}
+  inline double acos(double x){return vdt::fast_acos(x);}
+  inline float acosf(float x){return vdt::fast_acosf(x);}
+  inline float acos(float x){return vdt::fast_acosf(x);}
+  inline double cos(double x){return vdt::fast_cos(x);}
+  inline float cosf(float x){return vdt::fast_cosf(x);}
+  inline float cos(float x){return vdt::fast_cosf(x);}
+  inline double log(double x){return vdt::fast_log(x);}
+  inline float logf(float x){return vdt::fast_logf(x);}
+  inline float log(float x){return vdt::fast_logf(x);}
+  inline double sin(double x){return vdt::fast_sin(x);}
+  inline float sinf(float x){return vdt::fast_sinf(x);}
+  inline float sin(float x){return vdt::fast_sinf(x);}
+  inline double tan(double x){return vdt::fast_tan(x);}
+  inline float tanf(float x){return vdt::fast_tanf(x);}
+  inline float tan(float x){return vdt::fast_tanf(x);}
+}
 
 //==============================================================================
 // propagateLineToRMPlex
@@ -287,8 +314,8 @@ void helixAtRFromIterativeCCSFullJac(const MPlexLV& inPar, const MPlexQI& inChg,
 
       float cosa = 0., sina = 0.;
       //no trig approx here, phi and theta can be large
-            float cosP = std::cos(phiin), sinP = std::sin(phiin);
-      const float cosT = std::cos(theta), sinT = std::sin(theta);
+            float cosP = cos(phiin), sinP = sin(phiin);
+      const float cosT = cos(theta), sinT = sin(theta);
       float pxin = cosP/ipt;
       float pyin = sinP/ipt;
 
@@ -296,7 +323,7 @@ void helixAtRFromIterativeCCSFullJac(const MPlexLV& inPar, const MPlexQI& inChg,
       {
 	dprint_np(n, std::endl << "attempt propagation from r=" << r0 << " to r=" << r << std::endl
 	       << "x=" << outPar.At(n, 0, 0) << " y=" << outPar.At(n, 1, 0)  << " z=" << outPar.At(n, 2, 0)
-	       << " px=" << std::cos(phiin)/ipt << " py=" << std::sin(phiin)/ipt << " pz=" << 1.f/(ipt*tan(theta)) << " q=" << inChg.ConstAt(n, 0, 0) << std::endl);
+	       << " px=" << cos(phiin)/ipt << " py=" << sin(phiin)/ipt << " pz=" << 1.f/(ipt*tan(theta)) << " q=" << inChg.ConstAt(n, 0, 0) << std::endl);
 
 	r0 = hipo(outPar.ConstAt(n, 0, 0), outPar.ConstAt(n, 1, 0));
 	const float ialpha = (r-r0)*ipt/k;
@@ -305,8 +332,8 @@ void helixAtRFromIterativeCCSFullJac(const MPlexLV& inPar, const MPlexQI& inChg,
 	if (Config::useTrigApprox) {
 	  sincos4(ialpha, sina, cosa);
 	} else {
-	  cosa=std::cos(ialpha);
-	  sina=std::sin(ialpha);
+	  cosa=cos(ialpha);
+	  sina=sin(ialpha);
 	}
 
 	//derivatives of alpha
@@ -322,8 +349,8 @@ void helixAtRFromIterativeCCSFullJac(const MPlexLV& inPar, const MPlexQI& inChg,
 
 	//need phi at origin, so this goes before redefining phi
 	//no trig approx here, phi can be large
-	cosP=std::cos(outPar.At(n, 4, 0));
-	sinP=std::sin(outPar.At(n, 4, 0));
+	cosP=cos(outPar.At(n, 4, 0));
+	sinP=sin(outPar.At(n, 4, 0));
 
 	outPar.At(n, 2, 0) = outPar.ConstAt(n, 2, 0) + k*ialpha*cosT/(ipt*sinT);
 	outPar.At(n, 3, 0) = ipt;
@@ -355,7 +382,7 @@ void helixAtRFromIterativeCCSFullJac(const MPlexLV& inPar, const MPlexQI& inChg,
 
       dprint_np(n, "propagation end, dump parameters" << std::endl
 	     << "pos = " << outPar.At(n, 0, 0) << " " << outPar.At(n, 1, 0) << " " << outPar.At(n, 2, 0) << std::endl
-	     << "mom = " << std::cos(outPar.At(n, 4, 0))/outPar.At(n, 3, 0) << " " << std::sin(outPar.At(n, 4, 0))/outPar.At(n, 3, 0) << " " << 1./(outPar.At(n, 3, 0)*tan(outPar.At(n, 5, 0)))
+	     << "mom = " << cos(outPar.At(n, 4, 0))/outPar.At(n, 3, 0) << " " << sin(outPar.At(n, 4, 0))/outPar.At(n, 3, 0) << " " << 1./(outPar.At(n, 3, 0)*tan(outPar.At(n, 5, 0)))
 	     << " r=" << std::sqrt( outPar.At(n, 0, 0)*outPar.At(n, 0, 0) + outPar.At(n, 1, 0)*outPar.At(n, 1, 0) ) << " pT=" << 1./std::abs(outPar.At(n, 3, 0)) << std::endl);
       
 #ifdef DEBUG
@@ -410,14 +437,14 @@ void applyMaterialEffects(const MPlexQF &hitsRl, const MPlexQF& hitsXi,
       if (radL<0.0000000000001f) continue;//ugly, please fixme
       const float theta = outPar.ConstAt(n,0,5);
       const float pt = 1.f/outPar.ConstAt(n,0,3);
-      const float p = pt/std::sin(theta);
+      const float p = pt/sin(theta);
       const float p2 = p*p;
       constexpr float mpi = 0.140; // m=140 MeV, pion
       constexpr float mpi2 = mpi*mpi; // m=140 MeV, pion
       const float beta2 = p2/(p2+mpi2);
       const float beta = std::sqrt(beta2);
       //radiation lenght, corrected for the crossing angle (cos alpha from dot product of radius vector and momentum)
-      const float invCos = Config::endcapTest ? 1./std::abs(std::cos(theta)) : p/pt;
+      const float invCos = Config::endcapTest ? 1./std::abs(cos(theta)) : p/pt;
       radL = radL * invCos; //fixme works only for barrel geom
       // multiple scattering
       //vary independently phi and theta by the rms of the planar multiple scattering angle
@@ -856,6 +883,7 @@ void helixAtZ(const MPlexLV& inPar, const MPlexQI& inChg, MPlexLV& outPar,
 {
   errorProp.SetVal(0.f);
 
+  assert(!useParamBfield);
 #pragma simd
   for (int n = 0; n < NN; ++n)
     {
@@ -873,7 +901,7 @@ void helixAtZ(const MPlexLV& inPar, const MPlexQI& inChg, MPlexLV& outPar,
       const float phiin = inPar.ConstAt(n, 4, 0);
       const float theta = inPar.ConstAt(n, 5, 0);
 
-      const float k = inChg.ConstAt(n, 0, 0) * 100.f / (-Config::sol*(useParamBfield?Config::BfieldFromZR(zin,hipo(inPar.ConstAt(n,0,0),inPar.ConstAt(n,1,0))):Config::Bfield));
+      const float k = inChg.ConstAt(n, 0, 0) * 100.f / (-Config::sol*Config::Bfield);
 
       dprint_np(n, std::endl << "input parameters"
             << " inPar.ConstAt(n, 0, 0)=" << std::setprecision(9) << inPar.ConstAt(n, 0, 0)
@@ -888,8 +916,8 @@ void helixAtZ(const MPlexLV& inPar, const MPlexQI& inChg, MPlexLV& outPar,
 
       float cosa = 0., sina = 0.;
       //no trig approx here, phi can be large
-      float cosP = std::cos(phiin), sinP = std::sin(phiin);
-      float cosT = std::cos(theta), sinT = std::sin(theta);
+      float cosP = cos(phiin), sinP = sin(phiin);
+      float cosT = cos(theta), sinT = sin(theta);
       const float pxin = cosP*pt;
       const float pyin = sinP*pt;
 
@@ -901,12 +929,12 @@ void helixAtZ(const MPlexLV& inPar, const MPlexQI& inChg, MPlexLV& outPar,
       const float deltaZ = zout - zin;
       const float alpha  = deltaZ*sinT*ipt/(cosT*k);
 
-      if (Config::useTrigApprox) {
+      //      if (Config::useTrigApprox) {
 	sincos4(alpha, sina, cosa);
-      } else {
-	cosa=std::cos(alpha);
-	sina=std::sin(alpha);
-      }
+        //      } else {
+        //	cosa=cos(alpha);
+        //	sina=sin(alpha);
+        //      }
 
       //update parameters
       outPar.At(n, 0, 0) = outPar.At(n, 0, 0) + k*(pxin*sina - pyin*(1.f-cosa));
@@ -917,15 +945,15 @@ void helixAtZ(const MPlexLV& inPar, const MPlexQI& inChg, MPlexLV& outPar,
       dprint_np(n, std::endl << "outPar.At(n, 0, 0)=" << outPar.At(n, 0, 0) << " outPar.At(n, 1, 0)=" << outPar.At(n, 1, 0)
 		<< " pxin=" << pxin << " pyin=" << pyin);
 
-      errorProp(n,0,2) = cosP*sinT*(sinP*cosa*std::sin(cosP*sina) - cosa)/cosT;
-      errorProp(n,0,3) = cosP*sinT*deltaZ*cosa*( 1.f - sinP*std::sin(cosP*sina) )/(cosT*ipt) - k*(cosP*sina - sinP*(1.f-std::cos(cosP*sina)))/(ipt*ipt);
-      errorProp(n,0,4) = (k/ipt)*( -sinP*sina + sinP*sinP*sina*std::sin(cosP*sina) - cosP*(1.f - std::cos(cosP*sina) ) );
-      errorProp(n,0,5) = cosP*deltaZ*cosa*( 1.f - sinP*std::sin(cosP*sina) )/(cosT*cosT);
+      errorProp(n,0,2) = cosP*sinT*(sinP*cosa*sin(cosP*sina) - cosa)/cosT;
+      errorProp(n,0,3) = cosP*sinT*deltaZ*cosa*( 1.f - sinP*sin(cosP*sina) )/(cosT*ipt) - k*(cosP*sina - sinP*(1.f-cos(cosP*sina)))/(ipt*ipt);
+      errorProp(n,0,4) = (k/ipt)*( -sinP*sina + sinP*sinP*sina*sin(cosP*sina) - cosP*(1.f - cos(cosP*sina) ) );
+      errorProp(n,0,5) = cosP*deltaZ*cosa*( 1.f - sinP*sin(cosP*sina) )/(cosT*cosT);
 
-      errorProp(n,1,2) = cosa*sinT*(cosP*cosP*std::sin(cosP*sina) - sinP)/cosT;
-      errorProp(n,1,3) = sinT*deltaZ*cosa*( cosP*cosP*std::sin(cosP*sina) + sinP )/(cosT*ipt) - k*(sinP*sina + cosP*(1.f-std::cos(cosP*sina)))/(ipt*ipt);
-      errorProp(n,1,4) = (k/ipt)*( -sinP*(1.f - std::cos(cosP*sina)) - sinP*cosP*sina*std::sin(cosP*sina) + cosP*sina );
-      errorProp(n,1,5) = deltaZ*cosa*( cosP*cosP*std::sin(cosP*sina) + sinP )/(cosT*cosT);
+      errorProp(n,1,2) = cosa*sinT*(cosP*cosP*sin(cosP*sina) - sinP)/cosT;
+      errorProp(n,1,3) = sinT*deltaZ*cosa*( cosP*cosP*sin(cosP*sina) + sinP )/(cosT*ipt) - k*(sinP*sina + cosP*(1.f-cos(cosP*sina)))/(ipt*ipt);
+      errorProp(n,1,4) = (k/ipt)*( -sinP*(1.f - cos(cosP*sina)) - sinP*cosP*sina*sin(cosP*sina) + cosP*sina );
+      errorProp(n,1,5) = deltaZ*cosa*( cosP*cosP*sin(cosP*sina) + sinP )/(cosT*cosT);
 
       errorProp(n,4,2) = -ipt*sinT/(cosT*k);
       errorProp(n,4,3) = sinT*deltaZ/(cosT*k);
@@ -933,7 +961,7 @@ void helixAtZ(const MPlexLV& inPar, const MPlexQI& inChg, MPlexLV& outPar,
 
       dprint_np(n, "propagation end, dump parameters" << std::endl
 	     << "pos = " << outPar.At(n, 0, 0) << " " << outPar.At(n, 1, 0) << " " << outPar.At(n, 2, 0) << std::endl
-	     << "mom = " << std::cos(outPar.At(n, 4, 0))/outPar.At(n, 3, 0) << " " << std::sin(outPar.At(n, 4, 0))/outPar.At(n, 3, 0) << " " << 1./(outPar.At(n, 3, 0)*tan(outPar.At(n, 5, 0)))
+	     << "mom = " << cos(outPar.At(n, 4, 0))/outPar.At(n, 3, 0) << " " << sin(outPar.At(n, 4, 0))/outPar.At(n, 3, 0) << " " << 1./(outPar.At(n, 3, 0)*tan(outPar.At(n, 5, 0)))
 	     << " r=" << std::sqrt( outPar.At(n, 0, 0)*outPar.At(n, 0, 0) + outPar.At(n, 1, 0)*outPar.At(n, 1, 0) ) << " pT=" << 1./std::abs(outPar.At(n, 3, 0)) << std::endl);
 
 #ifdef DEBUG
