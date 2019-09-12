@@ -427,8 +427,8 @@ namespace Config
       #define MPT_SIZE 8
     #elif defined(__AVX__) || defined(__AVX2__)
       #define MPT_SIZE 8
-    #else
-      #define MPT_SIZE 8
+    #else //assume SSE-friendly
+      #define MPT_SIZE 4
     #endif
   #endif
 
