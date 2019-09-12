@@ -617,7 +617,7 @@ void helixAtZ(const MPlexLV& inPar,  const MPlexQI& inChg, const MPlexQF &msZ,
       const float phiin = inPar.ConstAt(n, 4, 0);
       const float theta = inPar.ConstAt(n, 5, 0);
 
-      const float k = inChg.ConstAt(n, 0, 0) * 100.f / (-Config::sol*(pflags.use_param_b_field?Config::BfieldFromZR(zin,hipo(inPar.ConstAt(n,0,0),inPar.ConstAt(n,1,0))):Config::Bfield));
+      const float k = inChg.ConstAt(n, 0, 0) * 100.f / (-Config::sol*Config::Bfield);
 
       dprint_np(n, std::endl << "input parameters"
             << " inPar.ConstAt(n, 0, 0)=" << std::setprecision(9) << inPar.ConstAt(n, 0, 0)
