@@ -28,6 +28,9 @@ void TrackState::convertFromCartesianToCCS() {
 void TrackState::convertFromCCSToCartesian() {
   //assume we are currently in ccs coordinates and want to move to cartesian
   const float invpt = parameters.At(3);
+  if( ! (invpt>=0.f) ){ 
+    throw std::runtime_error("BAD invpt "+std::to_string(invpt));
+  }
   const float phi   = parameters.At(4);
   const float theta = parameters.At(5);
   const float pt = 1.f/invpt;
@@ -92,6 +95,9 @@ void TrackState::convertFromGlbCurvilinearToCCS() {
 void TrackState::convertFromCCSToGlbCurvilinear() {
   //assume we are currently in ccs coordinates and want to move to global state with cartesian error
   const float invpt = parameters.At(3);
+  if( ! (invpt>=0.f) ){ 
+    throw std::runtime_error("BAD invpt "+std::to_string(invpt));
+  }
   const float phi   = parameters.At(4);
   const float theta = parameters.At(5);
   const float pt = 1.f/invpt;

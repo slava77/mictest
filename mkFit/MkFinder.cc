@@ -1137,6 +1137,13 @@ void MkFinder::BkFitInputTracks(TrackVec& cands, int beg, int end)
 
   MatriplexTrackPacker mtp(cands[beg]);
 
+  for (int i = beg; i < end; ++i)
+  {
+    const Track &trk = cands[i];
+    if (! (trk.state().parameters[3]>0.f) || ! (trk.state().parameters[5]>0.f)) 
+      throw std::runtime_error("BAD invpt in BkFitInputTracks "+std::to_string(trk.state().parameters[3]));
+  }
+
   int itrack = 0;
 
   for (int i = beg; i < end; ++i, ++itrack)
@@ -1298,12 +1305,49 @@ void MkFinder::BkFitFitTracksBH(const EventOfHits   & eventofhits,
     {
       PropagateTracksToHitR(msPar, N_proc, Config::backward_fit_pflags);
 
+      for (int n = 0; n < N_proc; ++n)
+      {
+        int nBad = 0;
+        for (int i = 0; i< 6; ++i) if (!std::isfinite(Par[iC].At(n,i,0))) nBad++;
+        for (int i = 0; i< 6; ++i) if (!std::isfinite(Par[iP].At(n,i,0))) nBad++;
+        if (! (Par[iC].At(n,3,0) > 0.f) || ! (Par[iP].At(n,3,0) > 0.f) 
+            || ! (Par[iC].At(n,5,0) > 0.f) || ! (Par[iP].At(n,5,0) > 0.f) || nBad){
+          char wbuf[200];
+          snprintf(wbuf,200,
+                   "BkFitFitTracksBH prop at %d BARREL %7.5g %7.5g %7.5g %7.5g %7.5g %7.5g -> %7.5g %7.5g %7.5g %7.5g %7.5g %7.5g \n",
+                   n,
+                   Par[iC].At(n,0,0),Par[iC].At(n,1,0),Par[iC].At(n,2,0),Par[iC].At(n,3,0),Par[iC].At(n,4,0),Par[iC].At(n,5,0),
+                   Par[iP].At(n,0,0),Par[iP].At(n,1,0),Par[iP].At(n,2,0),Par[iP].At(n,3,0),Par[iP].At(n,4,0),Par[iP].At(n,5,0)
+                   );
+          throw std::runtime_error(wbuf);
+        }
+      }
+
       kalmanOperation(KFO_Calculate_Chi2 | KFO_Update_Params,
                       Err[iP], Par[iP], msErr, msPar, Err[iC], Par[iC], tmp_chi2, N_proc);
     }
     else
     {
       PropagateTracksToHitZ(msPar, N_proc, Config::backward_fit_pflags);
+
+      for (int n = 0; n < N_proc; ++n)
+      {
+        int nBad = 0;
+        for (int i = 0; i< 6; ++i) if (!std::isfinite(Par[iC].At(n,i,0))) nBad++;
+        for (int i = 0; i< 6; ++i) if (!std::isfinite(Par[iP].At(n,i,0))) nBad++;
+        if (! (Par[iC].At(n,3,0) > 0.f) || ! (Par[iP].At(n,3,0) > 0.f) 
+            || ! (Par[iC].At(n,5,0) > 0.f) || ! (Par[iP].At(n,5,0) > 0.f) || nBad)
+        {
+          char wbuf[200];
+          snprintf(wbuf,200,
+                   "BkFitFitTracksBH prop at %d ENDCAP %7.5g %7.5g %7.5g %7.5g %7.5g %7.5g -> %7.5g %7.5g %7.5g %7.5g %7.5g %7.5g \n",
+                   n,
+                   Par[iC].At(n,0,0),Par[iC].At(n,1,0),Par[iC].At(n,2,0),Par[iC].At(n,3,0),Par[iC].At(n,4,0),Par[iC].At(n,5,0),
+                   Par[iP].At(n,0,0),Par[iP].At(n,1,0),Par[iP].At(n,2,0),Par[iP].At(n,3,0),Par[iP].At(n,4,0),Par[iP].At(n,5,0)
+                   );
+          throw std::runtime_error(wbuf);
+        }
+      }
 
       kalmanOperationEndcap(KFO_Calculate_Chi2 | KFO_Update_Params,
                             Err[iP], Par[iP], msErr, msPar, Err[iC], Par[iC], tmp_chi2, N_proc);
@@ -1317,8 +1361,20 @@ void MkFinder::BkFitFitTracksBH(const EventOfHits   & eventofhits,
         Chg.At(n, 0, 0)  = -Chg.At(n, 0, 0);
         Par[iC].At(n,3,0) = -Par[iC].At(n,3,0);
       }
+
+      if (! (Par[iC].At(n,3,0) > 0.f) || ! (Par[iC].At(n,5,0) > 0.f)){
+          char wbuf[200];
+          snprintf(wbuf,200,
+                   "BkFitFitTracksBH upd at %d %s %7.5g %7.5g %7.5g %7.5g %7.5g %7.5g -> %7.5g %7.5g %7.5g %7.5g %7.5g %7.5g \n",
+                   n, (LI.is_barrel()? " BARREL ": " ENDCAP "),
+                   Par[iP].At(n,0,0),Par[iP].At(n,1,0),Par[iP].At(n,2,0),Par[iP].At(n,3,0),Par[iP].At(n,4,0),Par[iP].At(n,5,0),
+                   Par[iC].At(n,0,0),Par[iC].At(n,1,0),Par[iC].At(n,2,0),Par[iC].At(n,3,0),Par[iC].At(n,4,0),Par[iC].At(n,5,0)
+                   );
+          throw std::runtime_error(wbuf);
+      }
     }
 
+    
 
 #ifdef DEBUG_BACKWARD_FIT_BH
     // Dump per hit chi2

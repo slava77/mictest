@@ -310,7 +310,10 @@ void MkBuilder::select_best_comb_cands()
 
 void MkBuilder::export_best_comb_cands(TrackVec &out_vec)
 {
+  const int inSize = out_vec.size();
+  int nAdded = 0;
   const EventOfCombCandidates &eoccs = m_event_of_comb_cands;
+  const int eoccSize = eoccs.m_size;
   out_vec.reserve(out_vec.size() + eoccs.m_size);
   for (int i = 0; i < eoccs.m_size; i++)
   {
@@ -322,6 +325,23 @@ void MkBuilder::export_best_comb_cands(TrackVec &out_vec)
     {
       const TrackCand &bcand = eoccs[i].front();
       out_vec.emplace_back( bcand.exportTrack() );
+      nAdded++;
+    }
+  }
+
+  {
+    if (inSize!=0) throw std::runtime_error("export_best_comb_cands : started at "+std::to_string(inSize));
+    for (auto const& trk : out_vec)
+    {
+      if (! (trk.state().parameters[3]>0.f) || ! (trk.state().parameters[5]>0.f))
+        throw std::runtime_error("export_best_comb_cands BAD invpt for "
+                                 +std::to_string(trk.state().parameters[0])
+                                 +" "+std::to_string(trk.state().parameters[1])
+                                 +" "+std::to_string(trk.state().parameters[2])
+                                 +" "+std::to_string(trk.state().parameters[3])
+                                 +" "+std::to_string(trk.state().parameters[4])
+                                 +" "+std::to_string(trk.state().parameters[5])
+                                 );
     }
   }
 }
@@ -2052,6 +2072,20 @@ void MkBuilder::fit_cands_BH(MkFinder *mkfndr, int start_cand, int end_cand, int
     //   printf("  %4d with q=%+d chi2=%7.3f pT=%7.3f eta=% 7.3f x=%.3f y=%.3f z=%.3f nHits=%2d  label=%4d findable=%d\n",
     //          i, t.charge(), t.chi2(), t.pT(), t.momEta(), t.x(), t.y(), t.z(), t.nFoundHits(), t.label(), t.isFindable());
     // }
+  }
+
+  for (int icand = start_cand; icand < end_cand; ++icand)
+  {
+    const Track &trk = m_tracks[icand];
+    if (! (trk.state().parameters[3]>0.f) || ! (trk.state().parameters[5]>0.f)) 
+      throw std::runtime_error("fit_cands_BH end: BAD invpt for "+std::to_string(icand)+ " in range "+std::to_string(start_cand)+" "+std::to_string(end_cand)
+                               +" "+std::to_string(trk.state().parameters[0])
+                               +" "+std::to_string(trk.state().parameters[1])
+                               +" "+std::to_string(trk.state().parameters[2])
+                               +" "+std::to_string(trk.state().parameters[3])
+                               +" "+std::to_string(trk.state().parameters[4])
+                               +" "+std::to_string(trk.state().parameters[5])
+                               );
   }
 }
 
