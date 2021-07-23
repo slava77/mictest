@@ -520,6 +520,7 @@ void kalmanPropagateAndComputeChi2(const MPlexLS &psErr,  const MPlexLV& psPar, 
                                          MPlexQF& outChi2,
                                    const int      N_proc, const PropagationFlags propFlags)
 {
+  bool debug = true;
   if (Config::finding_requires_propagation_to_hit_pos)
   {
     MPlexLS propErr;
@@ -554,21 +555,22 @@ void kalmanOperation(const int      kfOp,
 #ifdef DEBUG
   {
     dmutex_guard;
+    printf("kalmanOperation\n");
     printf("psPar:\n");
     for (int i = 0; i < 6; ++i) { 
-      printf("%8f ", psPar.ConstAt(0,0,i)); printf("\n");
+      printf("%8.7g ", psPar.ConstAt(0,0,i));
     } printf("\n");
     printf("psErr:\n");
     for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-        printf("%8f ", psErr.ConstAt(0,i,j)); printf("\n");
+        printf("%8.7g ", psErr.ConstAt(0,i,j)); printf("\n");
     } printf("\n");
     printf("msPar:\n");
     for (int i = 0; i < 3; ++i) {
-      printf("%8f ", msPar.ConstAt(0,0,i)); printf("\n");
+      printf("%8.7g ", msPar.ConstAt(0,0,i));
     } printf("\n");
     printf("msErr:\n");
     for (int i = 0; i < 3; ++i) { for (int j = 0; j < 3; ++j)
-        printf("%8f ", msErr.ConstAt(0,i,j)); printf("\n");
+        printf("%8.7g ", msErr.ConstAt(0,i,j)); printf("\n");
     } printf("\n");
   }
 #endif
@@ -608,7 +610,7 @@ void kalmanOperation(const int      kfOp,
     dmutex_guard;
     printf("resErr_loc:\n");
     for (int i = 0; i < 2; ++i) { for (int j = 0; j < 2; ++j)
-        printf("%8f ", resErr_loc.At(0,i,j)); printf("\n");
+        printf("%8.7g ", resErr_loc.At(0,i,j)); printf("\n");
     } printf("\n");
   }
 #endif
@@ -626,9 +628,9 @@ void kalmanOperation(const int      kfOp,
       printf("resErr_loc (Inv):\n");
       for (int i = 0; i < 2; ++i) {
         for (int j = 0; j < 2; ++j)
-          printf("%8f ", resErr_loc.At(0,i,j)); printf("\n");
+          printf("%8.7g ", resErr_loc.At(0,i,j)); printf("\n");
       } printf("\n");
-      printf("chi2: %8f\n", outChi2.At(0,0,0));
+      printf("chi2: %8.7g\n", outChi2.At(0,0,0));
     }
 #endif
   }
@@ -653,27 +655,27 @@ void kalmanOperation(const int      kfOp,
       dmutex_guard;
       printf("res_glo:\n");
       for (int i = 0; i < 3; ++i) {
-        printf("%8f ", res_glo.At(0,i,0));
+        printf("%8.7g ", res_glo.At(0,i,0));
       } printf("\n");
       printf("res_loc:\n");
       for (int i = 0; i < 2; ++i) {
-        printf("%8f ", res_loc.At(0,i,0));
+        printf("%8.7g ", res_loc.At(0,i,0));
       } printf("\n");
       printf("resErr_loc (Inv):\n");
       for (int i = 0; i < 2; ++i) { for (int j = 0; j < 2; ++j)
-          printf("%8f ", resErr_loc.At(0,i,j)); printf("\n");
+          printf("%8.7g ", resErr_loc.At(0,i,j)); printf("\n");
       } printf("\n");
       printf("K:\n");
       for (int i = 0; i < 6; ++i) { for (int j = 0; j < 3; ++j)
-          printf("%8f ", K.At(0,i,j)); printf("\n");
+          printf("%8.7g ", K.At(0,i,j)); printf("\n");
       } printf("\n");
       printf("outPar:\n");
       for (int i = 0; i < 6; ++i) {
-        printf("%8f  ", outPar.At(0,i,0));
+        printf("%8.7g  ", outPar.At(0,i,0));
       } printf("\n");
       printf("outErr:\n");
       for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-          printf("%8f ", outErr.At(0,i,j)); printf("\n");
+          printf("%8.7g ", outErr.At(0,i,j)); printf("\n");
       } printf("\n");
     }
 #endif
@@ -780,22 +782,22 @@ void kalmanOperationEndcap(const int      kfOp,
 #ifdef DEBUG
   {
     dmutex_guard;
-    printf("updateParametersEndcapMPlex\n");
+    printf("kalmanOperationEndcap\n");
     printf("psPar:\n");
     for (int i = 0; i < 6; ++i) {
-      printf("%8f ", psPar.ConstAt(0,0,i)); printf("\n");
+      printf("%8.7g ", psPar.ConstAt(0,0,i));
     } printf("\n");
     printf("msPar:\n");
     for (int i = 0; i < 3; ++i) {
-      printf("%8f ", msPar.ConstAt(0,0,i)); printf("\n");
+      printf("%8.7g ", msPar.ConstAt(0,0,i));
     } printf("\n");
     printf("psErr:\n");
     for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-        printf("%8f ", psErr.ConstAt(0,i,j)); printf("\n");
+        printf("%8.7g ", psErr.ConstAt(0,i,j)); printf("\n");
     } printf("\n");
     printf("msErr:\n");
     for (int i = 0; i < 3; ++i) { for (int j = 0; j < 3; ++j)
-        printf("%8f ", msErr.ConstAt(0,i,j)); printf("\n");
+        printf("%8.7g ", msErr.ConstAt(0,i,j)); printf("\n");
     } printf("\n");
   }
 #endif
@@ -811,7 +813,7 @@ void kalmanOperationEndcap(const int      kfOp,
     dmutex_guard;
     printf("resErr:\n");
     for (int i = 0; i < 2; ++i) { for (int j = 0; j < 2; ++j)
-        printf("%8f ", resErr.At(0,i,j)); printf("\n");
+        printf("%8.7g ", resErr.At(0,i,j)); printf("\n");
     } printf("\n");
   }
 #endif
@@ -829,9 +831,9 @@ void kalmanOperationEndcap(const int      kfOp,
       printf("resErr_loc (Inv):\n");
       for (int i = 0; i < 2; ++i) {
         for (int j = 0; j < 2; ++j)
-          printf("%8f ", resErr.At(0,i,j)); printf("\n");
+          printf("%8.7g ", resErr.At(0,i,j)); printf("\n");
       } printf("\n");
-      printf("chi2: %8f\n", outChi2.At(0,0,0));
+      printf("chi2: %8.7g\n", outChi2.At(0,0,0));
     }
 #endif
   }
@@ -852,7 +854,7 @@ void kalmanOperationEndcap(const int      kfOp,
       dmutex_guard;
       printf("outErr before subtract:\n");
       for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-          printf("%8f ", outErr.At(0,i,j)); printf("\n");
+          printf("%8.7g ", outErr.At(0,i,j)); printf("\n");
       } printf("\n");
     }
 #endif
@@ -864,23 +866,23 @@ void kalmanOperationEndcap(const int      kfOp,
       dmutex_guard;
       printf("res:\n");
       for (int i = 0; i < 2; ++i) {
-        printf("%8f ", res.At(0,i,0));
+        printf("%8.7g ", res.At(0,i,0));
       } printf("\n");
       printf("resErr (Inv):\n");
       for (int i = 0; i < 2; ++i) { for (int j = 0; j < 2; ++j)
-          printf("%8f ", resErr.At(0,i,j)); printf("\n");
+          printf("%8.7g ", resErr.At(0,i,j)); printf("\n");
       } printf("\n");
       printf("K:\n");
       for (int i = 0; i < 6; ++i) { for (int j = 0; j < 2; ++j)
-          printf("%8f ", K.At(0,i,j)); printf("\n");
+          printf("%8.7g ", K.At(0,i,j)); printf("\n");
       } printf("\n");
       printf("outPar:\n");
       for (int i = 0; i < 6; ++i) {
-        printf("%8f  ", outPar.At(0,i,0));
+        printf("%8.7g  ", outPar.At(0,i,0));
       } printf("\n");
       printf("outErr:\n");
       for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-          printf("%8f ", outErr.At(0,i,j)); printf("\n");
+          printf("%8.7g ", outErr.At(0,i,j)); printf("\n");
       } printf("\n");
     }
 #endif

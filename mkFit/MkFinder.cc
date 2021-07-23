@@ -198,7 +198,7 @@ void MkFinder::getHitSelDynamicWindows(const float invpt, const float theta, flo
 void MkFinder::SelectHitIndices(const LayerOfHits &layer_of_hits,
                                 const int N_proc)
 {
-  // bool debug = true;
+  bool debug = true;
 
   const LayerOfHits &L = layer_of_hits;
   const IterationLayerConfig &ILC = *m_iteration_layer_config;
@@ -299,6 +299,9 @@ void MkFinder::SelectHitIndices(const LayerOfHits &layer_of_hits,
 
       XWsrResult[itrack] = L.is_within_z_sensitive_region(z, dz);
       assignbins(itrack, z, dz, phi, dphi, min_dq, max_dq, min_dphi, max_dphi);
+      dprintf("track %d ( %6.4g %6.4g %6.4g %6.4g %6.4g %6.4g ) assignbins: %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f\n",
+              itrack, x, y, z, Par[iI].ConstAt(itrack, 3, 0), Par[iI].ConstAt(itrack, 4, 0), Par[iI].ConstAt(itrack, 5, 0),
+              z, dz, phi, dphi, min_dq, max_dq, min_dphi, max_dphi);
     }
   }
   else // endcap
@@ -347,6 +350,8 @@ void MkFinder::SelectHitIndices(const LayerOfHits &layer_of_hits,
 
       XWsrResult[itrack] = L.is_within_r_sensitive_region(r, dr);
       assignbins(itrack, r, dr, phi, dphi, min_dq, max_dq, min_dphi, max_dphi);
+      dprintf("track %d invpt %6.4g theta %6.4f assignbins: %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f\n",
+              itrack, invpt, theta, r, dr, phi, dphi, min_dq, max_dq, min_dphi, max_dphi);
     }
   }
 
@@ -600,16 +605,15 @@ void MkFinder::SelectHitIndices(const LayerOfHits &layer_of_hits,
 	      }
 	    }
 #endif
-	    
+            dprintf("     SHI %3d %4d %4d %5d  %6.3f %6.3f %6.4f %7.5f   %s\n",
+                     qi, pi, pb, hi,
+                     L.m_hit_qs[hi], L.m_hit_phis[hi], ddq, ddphi,
+                     (ddq < dq && ddphi < dphi) ? "PASS" : "FAIL");
+
             if (ddq >= dq)
               continue;
             if (ddphi >= dphi)
               continue;
-
-            // dprintf("     SHI %3d %4d %4d %5d  %6.3f %6.3f %6.4f %7.5f   %s\n",
-            //         qi, pi, pb, hi,
-            //         L.m_hit_qs[hi], L.m_hit_phis[hi], ddq, ddphi,
-            //         (ddq < dq && ddphi < dphi) ? "PASS" : "FAIL");
 
             // MT: Removing extra check gives full efficiency ...
             //     and means our error estimations are wrong!
@@ -952,7 +956,7 @@ void MkFinder::FindCandidatesCloneEngine(const LayerOfHits &layer_of_hits, CandC
                                          const int offset, const int N_proc,
                                          const FindingFoos &fnd_foos)
 {
-  // bool debug = true;
+  bool debug = true;
 
   MatriplexHitPacker mhp(* layer_of_hits.GetHitArray());
 
@@ -996,13 +1000,15 @@ void MkFinder::FindCandidatesCloneEngine(const LayerOfHits &layer_of_hits, CandC
     for (int itrack = 0; itrack < N_proc; ++itrack)
     {
       // make sure the hit was in the compatiblity window for the candidate
+      dprint("on track "<<itrack<<" with hit_cnt "<<hit_cnt<<" vs max "<<XHitSize[itrack]);
 
       if (hit_cnt < XHitSize[itrack])
       {
         // XXX-NUM-ERR assert(chi2 >= 0);
         const float chi2 = std::abs(outChi2[itrack]); //fixme negative chi2 sometimes...
 
-        dprint("chi2=" << chi2 << " for trkIdx=" << itrack << " hitIdx=" << XHitArr.At(itrack, hit_cnt, 0));
+        dprint("chi2=" << chi2 << " for trkIdx=" << itrack << " hitIdx=" << XHitArr.At(itrack, hit_cnt, 0)
+               <<" vs cut "<<m_iteration_params->chi2Cut<<" ovlp "<<m_iteration_params->chi2CutOverlap);
         if (chi2 < m_iteration_params->chi2Cut)
         {
           const int hit_idx = XHitArr.At(itrack, hit_cnt, 0);
@@ -1028,7 +1034,8 @@ void MkFinder::FindCandidatesCloneEngine(const LayerOfHits &layer_of_hits, CandC
           tmpList.score    = getScoreStruct(tmpList);
           cloner.add_cand(SeedIdx(itrack, 0, 0) - offset, tmpList);
 
-          dprint("  adding hit with hit_cnt=" << hit_cnt << " for trkIdx=" << tmpList.trkIdx << " orig Seed=" << Label(itrack, 0, 0));
+          dprint("  adding hit with hit_cnt=" << hit_cnt << " for trkIdx=" << tmpList.trkIdx << " orig Seed=" << Label(itrack, 0, 0)
+                 <<" chi2 "<<tmpList.chi2<<" score "<<tmpList.score<<" nh "<<tmpList.nhits<<" "<<tmpList.noverlaps<<" "<<tmpList.nholes);
         }
       }
     }
@@ -1073,7 +1080,8 @@ void MkFinder::FindCandidatesCloneEngine(const LayerOfHits &layer_of_hits, CandC
     tmpList.chi2_hit = 0;
     tmpList.score    = getScoreStruct(tmpList);
     cloner.add_cand(SeedIdx(itrack, 0, 0) - offset, tmpList);
-    dprint("adding invalid hit " << fake_hit_idx);
+    dprint("adding invalid hit " << fake_hit_idx<<" chi2 "<<tmpList.chi2<<" score "<<tmpList.score<<" nh "<<tmpList.nhits<<" "<<tmpList.noverlaps
+           <<" "<<tmpList.nholes<<" "<<tmpList.ntailholes);
   }
 }
 

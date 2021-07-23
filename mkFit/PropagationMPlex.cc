@@ -375,12 +375,12 @@ void helixAtRFromIterativeCCSFullJac(const MPlexLV& inPar, const MPlexQI& inChg,
       {
 	dmutex_guard;
 	std::cout << n << " jacobian" << std::endl;
-	printf("%5f %5f %5f %5f %5f %5f\n", errorProp(n,0,0),errorProp(n,0,1),errorProp(n,0,2),errorProp(n,0,3),errorProp(n,0,4),errorProp(n,0,5));
-	printf("%5f %5f %5f %5f %5f %5f\n", errorProp(n,1,0),errorProp(n,1,1),errorProp(n,1,2),errorProp(n,1,3),errorProp(n,1,4),errorProp(n,1,5));
-	printf("%5f %5f %5f %5f %5f %5f\n", errorProp(n,2,0),errorProp(n,2,1),errorProp(n,2,2),errorProp(n,2,3),errorProp(n,2,4),errorProp(n,2,5));
-	printf("%5f %5f %5f %5f %5f %5f\n", errorProp(n,3,0),errorProp(n,3,1),errorProp(n,3,2),errorProp(n,3,3),errorProp(n,3,4),errorProp(n,3,5));
-	printf("%5f %5f %5f %5f %5f %5f\n", errorProp(n,4,0),errorProp(n,4,1),errorProp(n,4,2),errorProp(n,4,3),errorProp(n,4,4),errorProp(n,4,5));
-	printf("%5f %5f %5f %5f %5f %5f\n", errorProp(n,5,0),errorProp(n,5,1),errorProp(n,5,2),errorProp(n,5,3),errorProp(n,5,4),errorProp(n,5,5));
+	printf("%6.5g %6.5g %6.5g %6.5g %6.5g %6.5g\n", errorProp(n,0,0),errorProp(n,0,1),errorProp(n,0,2),errorProp(n,0,3),errorProp(n,0,4),errorProp(n,0,5));
+	printf("%6.5g %6.5g %6.5g %6.5g %6.5g %6.5g\n", errorProp(n,1,0),errorProp(n,1,1),errorProp(n,1,2),errorProp(n,1,3),errorProp(n,1,4),errorProp(n,1,5));
+	printf("%6.5g %6.5g %6.5g %6.5g %6.5g %6.5g\n", errorProp(n,2,0),errorProp(n,2,1),errorProp(n,2,2),errorProp(n,2,3),errorProp(n,2,4),errorProp(n,2,5));
+	printf("%6.5g %6.5g %6.5g %6.5g %6.5g %6.5g\n", errorProp(n,3,0),errorProp(n,3,1),errorProp(n,3,2),errorProp(n,3,3),errorProp(n,3,4),errorProp(n,3,5));
+	printf("%6.5g %6.5g %6.5g %6.5g %6.5g %6.5g\n", errorProp(n,4,0),errorProp(n,4,1),errorProp(n,4,2),errorProp(n,4,3),errorProp(n,4,4),errorProp(n,4,5));
+	printf("%6.5g %6.5g %6.5g %6.5g %6.5g %6.5g\n", errorProp(n,5,0),errorProp(n,5,1),errorProp(n,5,2),errorProp(n,5,3),errorProp(n,5,4),errorProp(n,5,5));
       }
 #endif
     }
@@ -402,6 +402,12 @@ void helixAtRFromIterativeCCS(const MPlexLV& inPar,     const MPlexQI& inChg, co
   outFailFlag.SetVal(0.f);
 
   helixAtRFromIterativeCCS_impl(inPar, inChg, msRad, outPar, errorProp, outFailFlag, 0, NN, N_proc, pflags);
+
+  bool debug = true;
+  dprintf("hAtR : %7.5g %7.5g %7.5g %6.4g %6.4g %6.4g -> %7.5g %7.5g %7.5g %6.4g %6.4g %6.4g\n",
+          inPar.ConstAt(0,0,0), inPar.ConstAt(0,0,1), inPar.ConstAt(0,0,2), inPar.ConstAt(0,0,3), inPar.ConstAt(0,0,4), inPar.ConstAt(0,0,5),
+          outPar.ConstAt(0,0,0), outPar.ConstAt(0,0,1), outPar.ConstAt(0,0,2), outPar.ConstAt(0,0,3), outPar.ConstAt(0,0,4), outPar.ConstAt(0,0,5));
+
 }
 
 
@@ -410,7 +416,7 @@ void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
 			          MPlexLS &outErr,       MPlexLV& outPar,
                             const int      N_proc, const PropagationFlags pflags)
 {
-   // bool debug = true;
+   bool debug = true;
 
    // This is used further down when calculating similarity with errorProp (and before in DEBUG).
    // MT: I don't think this really needed if we use inErr where required.
@@ -430,12 +436,12 @@ void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
      {
        dprintf("outErr before prop %d\n", kk);
        for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-           dprintf("%8f ", outErr.At(kk,i,j)); printf("\n");
+           dprintf("%8g ", outErr.At(kk,i,j)); printf("\n");
        } dprintf("\n");
 
        dprintf("errorProp %d\n", kk);
        for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-           dprintf("%8f ", errorProp.At(kk,i,j)); printf("\n");
+           dprintf("%8g ", errorProp.At(kk,i,j)); printf("\n");
        } dprintf("\n");
 
      }
@@ -498,6 +504,23 @@ void propagateHelixToRMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
        outErr.CopySlot(i, inErr);
      }
    }
+
+   dprintf("propToR : %7.5g %7.5g %7.5g %6.4g %6.4g %6.4g -> %7.5g %7.5g %7.5g %6.4g %6.4g %6.4g\n",
+           inPar.ConstAt(0,0,0), inPar.ConstAt(0,0,1), inPar.ConstAt(0,0,2), inPar.ConstAt(0,0,3), inPar.ConstAt(0,0,4), inPar.ConstAt(0,0,5),
+           outPar.ConstAt(0,0,0), outPar.ConstAt(0,0,1), outPar.ConstAt(0,0,2), outPar.ConstAt(0,0,3), outPar.ConstAt(0,0,4), outPar.ConstAt(0,0,5));
+#ifdef DEBUG
+   {
+     for (int kk = 0; kk < N_proc; ++kk)
+     {
+       dprintf("outErr %d\n", kk);
+       for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
+           dprintf("%8g ", outErr.ConstAt(kk,i,j)); printf("\n");
+       } dprintf("\n");
+
+     }
+   }
+#endif
+
 }
 
 
@@ -508,7 +531,7 @@ void propagateHelixToZMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
 			          MPlexLS &outErr,       MPlexLV& outPar,
                             const int      N_proc, const PropagationFlags pflags)
 {
-   // debug = true;
+   bool debug = true;
 
    outErr = inErr;
    outPar = inPar;
@@ -523,12 +546,12 @@ void propagateHelixToZMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
      {
        dprintf("inErr %d\n", kk);
        for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-           dprintf("%8f ", inErr.ConstAt(kk,i,j)); printf("\n");
+           dprintf("%8g ", inErr.ConstAt(kk,i,j)); printf("\n");
        } dprintf("\n");
 
        dprintf("errorProp %d\n", kk);
        for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
-           dprintf("%8f ", errorProp.At(kk,i,j)); printf("\n");
+           dprintf("%8g ", errorProp.At(kk,i,j)); printf("\n");
        } dprintf("\n");
 
      }
@@ -564,6 +587,21 @@ void propagateHelixToZMPlex(const MPlexLS &inErr,  const MPlexLV& inPar,
    MultHelixPropEndcap      (errorProp, outErr, temp);
    MultHelixPropTranspEndcap(errorProp, temp,   outErr);
 
+   dprintf("propToZ : %7.5g %7.5g %7.5g %6.4g %6.4g %6.4g -> %7.5g %7.5g %7.5g %6.4g %6.4g %6.4g\n",
+           inPar.ConstAt(0,0,0), inPar.ConstAt(0,0,1), inPar.ConstAt(0,0,2), inPar.ConstAt(0,0,3), inPar.ConstAt(0,0,4), inPar.ConstAt(0,0,5),
+           outPar.ConstAt(0,0,0), outPar.ConstAt(0,0,1), outPar.ConstAt(0,0,2), outPar.ConstAt(0,0,3), outPar.ConstAt(0,0,4), outPar.ConstAt(0,0,5));
+#ifdef DEBUG
+   {
+     for (int kk = 0; kk < N_proc; ++kk)
+     {
+       dprintf("outErr %d\n", kk);
+       for (int i = 0; i < 6; ++i) { for (int j = 0; j < 6; ++j)
+           dprintf("%8g ", outErr.ConstAt(kk,i,j)); printf("\n");
+       } dprintf("\n");
+
+     }
+   }
+#endif
    // This dump is now out of its place as similarity is done with matriplex ops.
    /*
 #ifdef DEBUG
@@ -698,12 +736,12 @@ void helixAtZ(const MPlexLV& inPar,  const MPlexQI& inChg, const MPlexQF &msZ,
       if (n < N_proc) {
 	dmutex_guard;
 	std::cout << n << ": jacobian" << std::endl;
-	printf("%5f %5f %5f %5f %5f %5f\n", errorProp(n,0,0),errorProp(n,0,1),errorProp(n,0,2),errorProp(n,0,3),errorProp(n,0,4),errorProp(n,0,5));
-	printf("%5f %5f %5f %5f %5f %5f\n", errorProp(n,1,0),errorProp(n,1,1),errorProp(n,1,2),errorProp(n,1,3),errorProp(n,1,4),errorProp(n,1,5));
-	printf("%5f %5f %5f %5f %5f %5f\n", errorProp(n,2,0),errorProp(n,2,1),errorProp(n,2,2),errorProp(n,2,3),errorProp(n,2,4),errorProp(n,2,5));
-	printf("%5f %5f %5f %5f %5f %5f\n", errorProp(n,3,0),errorProp(n,3,1),errorProp(n,3,2),errorProp(n,3,3),errorProp(n,3,4),errorProp(n,3,5));
-	printf("%5f %5f %5f %5f %5f %5f\n", errorProp(n,4,0),errorProp(n,4,1),errorProp(n,4,2),errorProp(n,4,3),errorProp(n,4,4),errorProp(n,4,5));
-	printf("%5f %5f %5f %5f %5f %5f\n", errorProp(n,5,0),errorProp(n,5,1),errorProp(n,5,2),errorProp(n,5,3),errorProp(n,5,4),errorProp(n,5,5));
+	printf("%6.5g %6.5g %6.5g %6.5g %6.5g %6.5g\n", errorProp(n,0,0),errorProp(n,0,1),errorProp(n,0,2),errorProp(n,0,3),errorProp(n,0,4),errorProp(n,0,5));
+	printf("%6.5g %6.5g %6.5g %6.5g %6.5g %6.5g\n", errorProp(n,1,0),errorProp(n,1,1),errorProp(n,1,2),errorProp(n,1,3),errorProp(n,1,4),errorProp(n,1,5));
+	printf("%6.5g %6.5g %6.5g %6.5g %6.5g %6.5g\n", errorProp(n,2,0),errorProp(n,2,1),errorProp(n,2,2),errorProp(n,2,3),errorProp(n,2,4),errorProp(n,2,5));
+	printf("%6.5g %6.5g %6.5g %6.5g %6.5g %6.5g\n", errorProp(n,3,0),errorProp(n,3,1),errorProp(n,3,2),errorProp(n,3,3),errorProp(n,3,4),errorProp(n,3,5));
+	printf("%6.5g %6.5g %6.5g %6.5g %6.5g %6.5g\n", errorProp(n,4,0),errorProp(n,4,1),errorProp(n,4,2),errorProp(n,4,3),errorProp(n,4,4),errorProp(n,4,5));
+	printf("%6.5g %6.5g %6.5g %6.5g %6.5g %6.5g\n", errorProp(n,5,0),errorProp(n,5,1),errorProp(n,5,2),errorProp(n,5,3),errorProp(n,5,4),errorProp(n,5,5));
       }
 #endif
     }
