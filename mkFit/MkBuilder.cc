@@ -206,7 +206,7 @@ void MkBuilder::end_event()
 
 void MkBuilder::import_seeds(const TrackVec &in_seeds, std::function<insert_seed_foo> insert_seed)
 {
-  // bool debug = true;
+  bool debug = true;
 
   const int size = in_seeds.size();
 
@@ -1533,7 +1533,7 @@ void MkBuilder::find_tracks_handle_missed_layers(MkFinder *mkfndr, const LayerIn
   // screwed by then. See comment there, too.
   // One could also do a pre-check ... so as not to use up a slot.
 
-  // bool debug = true;
+  bool debug = true;
 
   for (int ti = itrack; ti < end; ++ti)
   {
@@ -1824,6 +1824,7 @@ void MkBuilder::FindTracksCloneEngine()
 void MkBuilder::find_tracks_in_layers(CandCloner &cloner, MkFinder *mkfndr,
                                       const int start_seed, const int end_seed, const int region)
 {
+  bool debug = true;
   EventOfCombCandidates &eoccs    = m_event_of_comb_cands;
   const TrackerInfo     &trk_info = m_job->m_trk_info;
   const SteeringParams  &st_par   = m_job->steering_params(region);
@@ -2022,15 +2023,17 @@ void MkBuilder::fit_cands_BH(MkFinder *mkfndr, int start_cand, int end_cand, int
 {
   const SteeringParams &st_par = m_job->steering_params(region);
 
+  const EventOfCombCandidates &eoccs = m_event_of_comb_cands;
+
   for (int icand = start_cand; icand < end_cand; icand += NN)
   {
     const int end = std::min(icand + NN, end_cand);
 
-    // printf("Pre Final fit for %d - %d\n", icand, end);
-    // for (int i = icand; i < end; ++i) { const Track &t = eoccs[i][0];
-    //   printf("  %4d with q=%+d chi2=%7.3f pT=%7.3f eta=% 7.3f x=%.3f y=%.3f z=%.3f nHits=%2d  label=%4d findable=%d\n",
-    //          i, t.charge(), t.chi2(), t.pT(), t.momEta(), t.x(), t.y(), t.z(), t.nFoundHits(), t.label(), t.isFindable());
-    // }
+    printf("Pre Final fit for %d - %d\n", icand, end);
+    for (int i = icand; i < end; ++i) { const TrackCand &t = eoccs[i][0];
+      printf("  %4d with q=%+d chi2=%7.3f pT=%7.3f eta=% 7.3f x=%.3f y=%.3f z=%.3f nHits=%2d  label=%4d findable=%d\n",
+             i, t.charge(), t.chi2(), t.pT(), t.momEta(), t.x(), t.y(), t.z(), t.nFoundHits(), t.label(), t.isFindable());
+    }
 
     bool chi_debug = false;
 #ifdef DEBUG_BACKWARD_FIT_BH
@@ -2067,11 +2070,11 @@ void MkBuilder::fit_cands_BH(MkFinder *mkfndr, int start_cand, int end_cand, int
     // copy out full set of info at last propagated position
     mkfndr->BkFitOutputTracks(m_tracks, icand, end);
 
-    // printf("Post Final fit for %d - %d\n", icand, end);
-    // for (int i = icand; i < end; ++i) { const Track &t = eoccs[i][0];
-    //   printf("  %4d with q=%+d chi2=%7.3f pT=%7.3f eta=% 7.3f x=%.3f y=%.3f z=%.3f nHits=%2d  label=%4d findable=%d\n",
-    //          i, t.charge(), t.chi2(), t.pT(), t.momEta(), t.x(), t.y(), t.z(), t.nFoundHits(), t.label(), t.isFindable());
-    // }
+    printf("Post Final fit for %d - %d\n", icand, end);
+    for (int i = icand; i < end; ++i) { const TrackCand &t = eoccs[i][0];
+      printf("  %4d with q=%+d chi2=%7.3f pT=%7.3f eta=% 7.3f x=%.3f y=%.3f z=%.3f nHits=%2d  label=%4d findable=%d\n",
+             i, t.charge(), t.chi2(), t.pT(), t.momEta(), t.x(), t.y(), t.z(), t.nFoundHits(), t.label(), t.isFindable());
+    }
   }
 
   for (int icand = start_cand; icand < end_cand; ++icand)
